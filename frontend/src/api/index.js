@@ -4,36 +4,56 @@ const api = axios.create({
   baseURL: '/api'
 })
 
-// Sources
+// ============ Videos API（替换原来的 /douban）============
+
+// 首页全量数据
+export const getHome = () => api.get('/videos/home')
+
+// 类型列表
+export const getGenres = () => api.get('/videos/genres')
+
+// 电影列表（实时 TMDB discover）
+export const getMovies = (params) => api.get('/videos/movies', { params })
+
+// 剧集列表（实时 TMDB discover）
+export const getTvShows = (params) => api.get('/videos/tv', { params })
+
+// 电影/剧集详情（实时 TMDB）
+export const getVideoDetail = (mediaType, tmdbId) => api.get(`/videos/${mediaType}/${tmdbId}`)
+
+// 剧集某季详情
+export const getSeasonDetail = (tmdbId, season) => api.get(`/videos/tv/${tmdbId}/seasons/${season}`)
+
+// 搜索
+export const searchVideos = (q, page) => api.get('/videos/search', { params: { q, page } })
+
+// ============ Sources API（保持不变）============
+
 export const getSources = (params) => api.get('/sources', { params })
 export const createSource = (data) => api.post('/sources', data)
 export const deleteSource = (id) => api.delete(`/sources/${id}`)
 export const triggerCrawl = () => api.post('/sources/crawl')
 export const speedTest = (id) => api.post(`/sources/speed-test/${id}`)
 
-// Douban / TMDB Videos
-export const getVideos = (params) => api.get('/douban/videos', { params })
-export const getVideo = (tmdbId) => api.get(`/douban/videos/${tmdbId}`)
-export const searchVideos = (q) => api.get('/douban/search', { params: { q } })
-export const searchTmdb = (q, mediaType) => api.get('/douban/tmdb/search', { params: { q, media_type: mediaType } })
-export const crawlVideo = (tmdbId, category) => api.post(`/douban/crawl/${tmdbId}`, null, { params: { category } })
-export const getTrending = (mediaType) => api.get('/douban/trending', { params: { media_type: mediaType } })
+// ============ Play API（保持不变）============
 
-// Play
 export const getPlaySources = () => api.get('/play/sources')
 
-// Parse Configs
+// ============ Parse Configs API（保持不变）============
+
 export const getParseConfigs = () => api.get('/parse-configs')
 export const createParseConfig = (data) => api.post('/parse-configs', data)
 export const updateParseConfig = (id, data) => api.put(`/parse-configs/${id}`, data)
 export const deleteParseConfig = (id) => api.delete(`/parse-configs/${id}`)
 
-// History
+// ============ History API（保持不变）============
+
 export const getHistory = () => api.get('/history')
 export const updateHistory = (tmdbId, data) => api.post('/history', { tmdb_id: tmdbId, ...data })
 export const deleteHistory = (tmdbId) => api.delete(`/history/${tmdbId}`)
 
-// Favorites
+// ============ Favorites API（保持不变）============
+
 export const getFavorites = () => api.get('/favorites')
 export const addFavorite = (tmdbId) => api.post('/favorites', { tmdb_id: tmdbId })
 export const removeFavorite = (tmdbId) => api.delete(`/favorites/${tmdbId}`)
