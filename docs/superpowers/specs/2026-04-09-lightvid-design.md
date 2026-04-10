@@ -1,6 +1,6 @@
 # LightVid 项目设计规格
 
-> **竞品参考：** Younify TV、AgileTV、IPTV Smarters Pro、PlayBox IPTV
+> **竞品参考：** Younify TV、AgileTV、IPTV Smarters、PlayBox IPTV
 > **研究日期：** 2026/04/10
 
 ## 一、项目概述
@@ -153,7 +153,7 @@ ParseConfig {
 
 **功能：**
 - 自动记录每个视频的上次播放位置
-- 首页展示"继续观看"模块
+- 首页展示"继续观看"模块（最近 6 条）
 - 一键续播到上次位置
 
 **数据模型：**
@@ -161,17 +161,29 @@ ParseConfig {
 WatchHistory {
   id: int (PK)
   douban_id: str  # 关联 DoubanVideo
-  source_id: int  # 上次播放的源
+  source_id: int (nullable)  # 上次播放的源，可为空
   progress: float  # 播放进度（秒）
-  duration: float  # 视频总时长（秒）
+  duration: float (nullable)  # 视频总时长（秒）
   last_watched: datetime
   updated_at: datetime
 }
 ```
 
 **API：**
-- `GET /api/history` - 获取观看历史列表
-- `POST /api/history` - 记录播放进度
+- `GET /api/history?limit=6` - 获取观看历史列表（按最近观看排序，支持 limit 参数）
+- `GET /api/history/{douban_id}` - 获取特定视频的播放历史
+- `POST /api/history` - 记录播放进度（upsert：存在则更新，不存在则创建）
+
+  **请求体：**
+  ```json
+  {
+    "douban_id": "1292052",
+    "source_id": 1,
+    "progress": 1234.5,
+    "duration": 3600.0
+  }
+  ```
+
 - `DELETE /api/history/{douban_id}` - 删除历史记录
 
 ---
@@ -180,22 +192,50 @@ WatchHistory {
 
 **功能：**
 - 用户可收藏感兴趣的视频
-- 收藏列表展示
+- 收藏列表展示（显示标题、海报、评分）
 - 快速访问收藏内容
 
 **数据模型：**
 ```
 Favorite {
   id: int (PK)
-  douban_id: str  # 关联 DoubanVideo
+  douban_id: str (unique)  # 关联 DoubanVideo
   created_at: datetime
 }
 ```
 
 **API：**
-- `GET /api/favorites` - 获取收藏列表
-- `POST /api/favorites/{douban_id}` - 添加收藏
+- `GET /api/favorites` - 获取收藏列表（包含关联的 DoubanVideo 信息）
+
+  **响应格式：**
+  ```json
+  [{
+    "id": 1,
+    "douban_id": "1292052",
+    "created_at": "2026-04-09T10:00:00Z",
+    "video": {
+      "title": "肖申克的救赎",
+      "poster_url": "https://...",
+      "rating": 9.7,
+      "year": 1994
+    }
+  }]
+  ```
+
+- `POST /api/favorites` - 添加收藏（幂等操作，重复添加无副作用）
+
+  **请求体：**
+  ```json
+  { "douban_id": "1292052" }
+  ```
+
 - `DELETE /api/favorites/{douban_id}` - 取消收藏
+- `GET /api/favorites/check/{douban_id}` - 检查是否已收藏
+
+  **响应：**
+  ```json
+  { "is_favorite": true }
+  ```
 
 ---
 
