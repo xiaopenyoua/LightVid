@@ -6,7 +6,7 @@ import asyncio
 
 from database import engine, Base, SessionLocal
 from api.sources import router as sources_router
-from api.douban import router as douban_router
+from api.videos import router as videos_router
 from api.parse_configs import router as parse_configs_router
 from api.play import router as play_router
 from api.history import router as history_router
@@ -29,7 +29,7 @@ app.add_middleware(
 
 # 注册路由
 app.include_router(sources_router)
-app.include_router(douban_router)
+app.include_router(videos_router)
 app.include_router(parse_configs_router)
 app.include_router(play_router)
 app.include_router(history_router)
@@ -76,6 +76,25 @@ async def startup_event():
     """启动时初始化"""
     # 初始化默认解析接口
     init_default_configs()
+
+    # 初始化/同步 TMDB 数据
+    from database import SessionLocal
+    from services.sync_service import SyncService
+
+    db = SessionLocal()
+    try:
+        sync = SyncService(db)
+        # 同步 Genre（阻塞式，确保启动后立即可用）
+        count = await sync.sync_genres()
+        print(f"[Startup] 已同步 {count} 个 Genre")
+
+        # 异步同步列表（后台进行）
+        asyncio.create_task(sync.sync_trending())
+        asyncio.create_task(sync.sync_popular())
+        asyncio.create_task(sync.sync_top_rated())
+        asyncio.create_task(sync.sync_upcoming())
+    finally:
+        db.close()
 
     # 启动定时任务 - 每6小时爬取TV Box源
     scheduler.add_job(
