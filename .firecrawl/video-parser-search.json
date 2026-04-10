@@ -1,0 +1,1405 @@
+6 Best Open-Source M3U8 Players: A Comprehensive Guide
+  URL: https://m3u8-player.net/blog/m3u8-open-source-players/
+  1. M3U8 Player - Professional Online HLS Streaming Solution · 2. VLC Media Player · 3. HLS.js · 4. Video.js · 5. Shaka Player · 6. Clappr.
+
+  --- Content ---
+  [![M3U8 Player](https://m3u8-player.net/logo.webp)M3U8 Player](https://m3u8-player.net/)
+  
+  [Share on Facebook](https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Flocalhost%3A3000%2Fblog%2Fm3u8-open-source-players)[Share on X](https://twitter.com/intent/tweet?url=http%3A%2F%2Flocalhost%3A3000%2Fblog%2Fm3u8-open-source-players&text=6%20Best%20Open-Source%20M3U8%20Players%3A%20A%20Comprehensive%20Guide)[Share on Pinterest](https://pinterest.com/pin/create/button/?url=http%3A%2F%2Flocalhost%3A3000%2Fblog%2Fm3u8-open-source-players&description=6%20Best%20Open-Source%20M3U8%20Players%3A%20A%20Comprehensive%20Guide)[Share on LinkedIn](https://www.linkedin.com/shareArticle?mini=true&url=http%3A%2F%2Flocalhost%3A3000%2Fblog%2Fm3u8-open-source-players&title=6%20Best%20Open-Source%20M3U8%20Players%3A%20A%20Comprehensive%20Guide)
+  
+  # [6 Best Open-Source M3U8 Players: A Comprehensive Guide](https://m3u8-player.net/blog/m3u8-open-source-players/\#6-best-open-source-m3u8-players-a-comprehensive-guide)
+  
+  M3U8 format has become the standard for streaming media delivery, powering everything from live broadcasts to on-demand video content. Whether you’re a developer looking for integration options or an end-user seeking the best viewing experience, choosing the right M3U8 player is crucial. This guide introduces six outstanding open-source players that excel in different scenarios.
+  
+  ## [1\. M3U8 Player - Professional Online HLS Streaming Solution](https://m3u8-player.net/blog/m3u8-open-source-players/\#1-m3u8-player---professional-online-hls-streaming-solution)
+  
+  [M3U8 Player](https://m3u8-player.net/) stands out as a powerful browser-based solution built on cutting-edge HLS.js technology. Unlike traditional desktop applications, this player requires zero installation – simply open your browser and start streaming. This approach eliminates compatibility issues and makes it instantly accessible from any device.
+  
+  **Key Features**: The player leverages modern browser capabilities to deliver adaptive bitrate streaming, automatically adjusting video quality based on your network conditions. When your connection is strong, it seamlessly switches to HD quality. During network congestion, it intelligently reduces quality to maintain smooth playback without buffering interruptions. This automatic optimization means you get the best possible viewing experience without manual intervention.
+  
+  ![M3U8 Player Screenshot](https://m3u8-player.net/imgs/screenshots/m3u8-player-web.png)
+  
+  ## [2\. VLC Media Player](https://m3u8-player.net/blog/m3u8-open-source-players/\#2-vlc-media-player)
+  
+  VLC Media Player remains one of the most trusted names in media playback, with support for virtually every audio and video format including M3U8. With millions of users worldwide, VLC has proven its reliability and versatility over decades of development.
+  
+  **Key Features**: Cross-platform compatibility across Windows, macOS, Linux, iOS, and Android. Beyond playback, VLC offers format conversion, streaming server capabilities, and extensive customization options.
+  
+  ## [3\. HLS.js](https://m3u8-player.net/blog/m3u8-open-source-players/\#3-hlsjs)
+  
+  HLS.js is a pure JavaScript library that brings HLS support to browsers that don’t natively support it. It’s the engine behind many online players, including the M3U8 Player mentioned above.
+  
+  **Key Features**: Lightweight, high-performance, and easy to integrate. Perfect for web developers who need to add streaming capabilities to their projects.
+  
+  ## [4\. Video.js](https://m3u8-player.net/blog/m3u8-open-source-players/\#4-videojs)
+  
+  Video.js is a popular HTML5 video player framework that supports HLS through its plugin system. It provides an attractive default interface with extensive customization options.
+  
+  **Key Features**: Highly customizable, rich plugin ecosystem, active community support. Ideal for projects requiring a branded player experience.
+  
+  ## [5\. Shaka Player](https://m3u8-player.net/blog/m3u8-open-source-players/\#5-shaka-player)
+  
+  Developed by Google, Shaka Player is an open-source JavaScript library that supports both HLS and DASH protocols. It’s particularly strong in handling encrypted content.
+  
+  **Key Features**: Excellent DRM support, intelligent bandwidth adaptation, offline playback capability. Perfect for commercial video platforms.
+  
+  ## [6\. Clappr](https://m3u8-player.net/blog/m3u8-open-source-players/\#6-clappr)
+  
+  Clappr is an extensible open-source media player from Brazil’s largest media company, Globo. Its plugin architecture allows for flexible feature additions.
+  
+  **Key Features**: Plugin-based architecture, easy to extend, lightweight core. Great for web applications needing quick player integration.
+  
+  ## [Choosing the Right M3U8 Player](https://m3u8-player.net/blog/m3u8-open-source-players/\#choosing-the-right-m3u8-player)
+  
+  Your choice depends on your specific needs. For instant playback without installation, M3U8 Player offers the best browser-based experience. If you need a full-featured desktop application, VLC is the go-to choice. Developers will find HLS.js and Video.js provide the flexibility needed for custom implementations.
+  
+  Consider these factors when selecting a player:
+  
+  - **Ease of use**: How quickly can you start streaming?
+  - **Stability**: Can it handle various network conditions and formats?
+  - **Features**: Does it meet your specific requirements?
+  - **Privacy**: Does it respect your data and viewing habits?
+  
+  ## [Conclusion](https://m3u8-player.net/blog/m3u8-open-source-players/\#conclusion)
+  
+  The M3U8 ecosystem offers solutions for every use case, from simple playback to complex streaming platforms. M3U8 Player’s zero-installation approach and professional features make it the ideal choice for most users. Whether you’re streaming live events, educational content, or testing your own streams, these players deliver the performance and reliability you need.
+  
+  As 5G networks expand and streaming technology evolves, M3U8 players will continue to be essential tools for accessing digital media. Choose the right player for your needs and enjoy the best that modern streaming technology has to offer.
+  
+  * * *
+  
+  **Related Keywords**: M3U8 player \| HLS player \| online video player \| M3U8 streaming \| open-source player \| streaming media player \| video playback tools \| HLS.js \| Video.js \| VLC
+  
+  ## Related Articles
+  
+  More articles picked for you about M3U8 streaming
+  
+  [Practical Tools **The Ultimate Guide to Free Popular IPTV Playlists (February 2026): 10,000+ Channels from Around the World** \\
+  Feb 1, 2026·18 min readRead](https://m3u8-player.net/blog/free-popular-iptv-playlist/) [Technical Tutorial **M3U8 vs. MP4: Why Online Video Streams Use M3U8 and Why You Want MP4** \\
+  Oct 30, 2025·9 min readRead](https://m3u8-player.net/blog/m3u8-vs-mp4-format-comparison/) [Technical Tutorial **2025 Ultimate Guide: How to Use M3U8 IPTV Playlists to Watch Free Live TV Online** \\
+  Oct 24, 2025·9 min readRead](https://m3u8-player.net/blog/m3u8-iptv-live-tv-guide/)
+  
+  ### Players
+  
+  - [M3U8 Player](https://m3u8-player.net/)
+  - [HLS Player](https://m3u8-player.net/hls-player/)
+  - [IPTV Manager](https://m3u8-player.net/iptv-playlist-manager/)
+  - [M3U8 Embed](https://m3u8-player.net/m3u8-embed/)
+  
+  ### Converters
+  
+  - [M3U8 to MP4](https://m3u8-player.net/m3u8tomp4/)
+  - [MP4 Converter](https://m3u8-player.net/mp4-converter/)
+  - [MOV to MP4](https://m3u8-player.net/mov-to-mp4/)
+  - [MKV to MP4](https://m3u8-player.net/mkv-to-mp4/)
+  - [Video to GIF](https://m3u8-player.net/video-to-gif/)
+  - [MP4 to MP3](https://m3u8-player.net/mp4-to-mp3/)
+  
+  ### Downloaders
+  
+  - [M3U8 Downloader](https://m3u8-player.net/m3u8downloader/)
+  - [MP4 Downloader](https://m3u8-player.net/mp4-downloader/)
+  - [Video Downloader](https://m3u8-player.net/online-video-downloader/)
+  
+  ### Tools
+  
+  - [Video Compressor](https://m3u8-player.net/video-compressor/)
+  - [FFmpeg Generator](https://m3u8-player.net/ffmpeg-generator/)
+  - [Chrome Extension](https://m3u8-player.net/ext/)
+  
+  ### Guides
+  
+  - [What is M3U8](https://m3u8-player.net/what-is-m3u8/)
+  - [M3U8 vs MP4](https://m3u8-player.net/m3u8-vs-mp4/)
+  - [HLS Streaming Guide](https://m3u8-player.net/hls-streaming-guide/)
+  - [M3U8 Errors](https://m3u8-player.net/m3u8-errors/)
+  - [Player Comparison](https://m3u8-player.net/m3u8-player-comparison/)
+  
+  ### Tutorials
+  
+  - [How to Play M3U8](https://m3u8-player.net/tutorials/play-m3u8/)
+  - [How to Download M3U8](https://m3u8-player.net/tutorials/download-m3u8/)
+  - [Extract M3U8 URL](https://m3u8-player.net/tutorials/extract-m3u8/)
+  - [Convert M3U8](https://m3u8-player.net/tutorials/convert-m3u8/)
+  - [Merge TS Files](https://m3u8-player.net/tutorials/merge-ts-files/)
+  - [FFmpeg M3U8 to MP4](https://m3u8-player.net/tutorials/ffmpeg-m3u8-mp4/)
+  
+  ### Resources
+  
+  - [Blog](https://m3u8-player.net/blog/)
+  - [IPTV Playlist](https://m3u8-player.net/iptv-playlist/)
+  - [Free IPTV](https://m3u8-player.net/iptv-playlist/free/)
+  - [4K Test Links](https://m3u8-player.net/tools/4k-m3u8-test-links/)
+  --- End Content ---
+
+Python m3u8 Parser for HTTP Live Streaming (HLS) Transmissions
+  URL: https://github.com/globocom/m3u8
+  To load a playlist into an object from uri, file path or directly from string, use the load/loads functions: import m3u8 playlist = m3u8.load('http:// ...
+  Category: github
+
+  --- Content ---
+  [Skip to content](https://github.com/globocom/m3u8#start-of-content)
+  
+  You signed in with another tab or window. [Reload](https://github.com/globocom/m3u8) to refresh your session.You signed out in another tab or window. [Reload](https://github.com/globocom/m3u8) to refresh your session.You switched accounts on another tab or window. [Reload](https://github.com/globocom/m3u8) to refresh your session.Dismiss alert
+  
+  {{ message }}
+  
+  [globocom](https://github.com/globocom)/ **[m3u8](https://github.com/globocom/m3u8)** Public
+  
+  - [Notifications](https://github.com/login?return_to=%2Fglobocom%2Fm3u8) You must be signed in to change notification settings
+  - [Fork\\
+  494](https://github.com/login?return_to=%2Fglobocom%2Fm3u8)
+  - [Star\\
+  2.3k](https://github.com/login?return_to=%2Fglobocom%2Fm3u8)
+  
+  
+  master
+  
+  [**4** Branches](https://github.com/globocom/m3u8/branches) [**60** Tags](https://github.com/globocom/m3u8/tags)
+  
+  [Go to Branches page](https://github.com/globocom/m3u8/branches)[Go to Tags page](https://github.com/globocom/m3u8/tags)
+  
+  Go to file
+  
+  Code
+  
+  Open more actions menu
+  
+  ## Folders and files
+  
+  | Name | Name | Last commit message | Last commit date |
+  | --- | --- | --- | --- |
+  | ## Latest commit<br>![dsfb](https://avatars.githubusercontent.com/u/2995775?v=4&size=40)![mauricioabreu](https://avatars.githubusercontent.com/u/1437542?v=4&size=40)<br>[dsfb](https://github.com/globocom/m3u8/commits?author=dsfb)<br>and<br>[mauricioabreu](https://github.com/globocom/m3u8/commits?author=mauricioabreu)<br>[Fix a file path error in the loader test](https://github.com/globocom/m3u8/commit/bfbfd48fccf446471dde0731f68f23d6c8299301)<br>last yearJan 31, 2025<br>[bfbfd48](https://github.com/globocom/m3u8/commit/bfbfd48fccf446471dde0731f68f23d6c8299301) · last yearJan 31, 2025<br>## History<br>[570 Commits](https://github.com/globocom/m3u8/commits/master/) <br>Open commit details<br>[View commit history for this file.](https://github.com/globocom/m3u8/commits/master/) 570 Commits |
+  | [.github/workflows](https://github.com/globocom/m3u8/tree/master/.github/workflows "This path skips through empty directories") | [.github/workflows](https://github.com/globocom/m3u8/tree/master/.github/workflows "This path skips through empty directories") | [Switch ruff action to run the latest version of v1](https://github.com/globocom/m3u8/commit/be02dc96bb503480b7ca178f92293a54e8125e9c "Switch ruff action to run the latest version of v1") | 2 years agoNov 11, 2024 |
+  | [m3u8](https://github.com/globocom/m3u8/tree/master/m3u8 "m3u8") | [m3u8](https://github.com/globocom/m3u8/tree/master/m3u8 "m3u8") | [Make ruff happy](https://github.com/globocom/m3u8/commit/9cb1225b70e0b47da1b0e81e70d0ba313b87fe54 "Make ruff happy") | 2 years agoNov 11, 2024 |
+  | [tests](https://github.com/globocom/m3u8/tree/master/tests "tests") | [tests](https://github.com/globocom/m3u8/tree/master/tests "tests") | [Fix a file path error in the loader test](https://github.com/globocom/m3u8/commit/bfbfd48fccf446471dde0731f68f23d6c8299301 "Fix a file path error in the loader test") | last yearJan 31, 2025 |
+  | [.editorconfig](https://github.com/globocom/m3u8/blob/master/.editorconfig ".editorconfig") | [.editorconfig](https://github.com/globocom/m3u8/blob/master/.editorconfig ".editorconfig") | [Update .editorconfig](https://github.com/globocom/m3u8/commit/ce911a122bc5b686101ac4c1af01d2ccbe727a40 "Update .editorconfig  Hello, Changed link having HTTP to HTTPS Thank You") | 4 years agoOct 12, 2022 |
+  | [.gitignore](https://github.com/globocom/m3u8/blob/master/.gitignore ".gitignore") | [.gitignore](https://github.com/globocom/m3u8/blob/master/.gitignore ".gitignore") | [feat: ignore vscode folder](https://github.com/globocom/m3u8/commit/c5e412821b1c24fcfa12d950a0e68053bb760d22 "feat: ignore vscode folder") | 2 years agoMay 13, 2024 |
+  | [LICENSE](https://github.com/globocom/m3u8/blob/master/LICENSE "LICENSE") | [LICENSE](https://github.com/globocom/m3u8/blob/master/LICENSE "LICENSE") | [Add LICENSE](https://github.com/globocom/m3u8/commit/0840f5b1b79acca11bd0259769b885e2a2a2dbc9 "Add LICENSE") | 14 years agoMay 18, 2012 |
+  | [MANIFEST.in](https://github.com/globocom/m3u8/blob/master/MANIFEST.in "MANIFEST.in") | [MANIFEST.in](https://github.com/globocom/m3u8/blob/master/MANIFEST.in "MANIFEST.in") | [fix: Broken README path](https://github.com/globocom/m3u8/commit/f78a8d067bdfc52fecb8d4ef67e14126ecb9c8cc "fix: Broken README path") | 2 years agoMay 13, 2024 |
+  | [README.md](https://github.com/globocom/m3u8/blob/master/README.md "README.md") | [README.md](https://github.com/globocom/m3u8/blob/master/README.md "README.md") | [docs: Convert rst to markdown](https://github.com/globocom/m3u8/commit/6d012e2512c3dfe08eae96772af4c4542498de92 "docs: Convert rst to markdown") | 2 years agoMay 13, 2024 |
+  | [requirements-dev.txt](https://github.com/globocom/m3u8/blob/master/requirements-dev.txt "requirements-dev.txt") | [requirements-dev.txt](https://github.com/globocom/m3u8/blob/master/requirements-dev.txt "requirements-dev.txt") | [remove coveralls](https://github.com/globocom/m3u8/commit/9cac9e0ff2f92c42ba1bb8d96f8dc895ffdc57b0 "remove coveralls") | 5 years agoJan 13, 2022 |
+  | [requirements.txt](https://github.com/globocom/m3u8/blob/master/requirements.txt "requirements.txt") | [requirements.txt](https://github.com/globocom/m3u8/blob/master/requirements.txt "requirements.txt") | [Use backport of built-in function for performance improvement](https://github.com/globocom/m3u8/commit/acd346410be7eab118faf78a57f4dcad435bda13 "Use backport of built-in function for performance improvement") | 3 years agoOct 26, 2023 |
+  | [runtests](https://github.com/globocom/m3u8/blob/master/runtests "runtests") | [runtests](https://github.com/globocom/m3u8/blob/master/runtests "runtests") | [Fix ShellCheck warning SC2068](https://github.com/globocom/m3u8/commit/2ebadf98107c09639808978b3dfad26bd39b2c7c "Fix ShellCheck warning SC2068") | 5 years agoMay 28, 2021 |
+  | [setup.py](https://github.com/globocom/m3u8/blob/master/setup.py "setup.py") | [setup.py](https://github.com/globocom/m3u8/blob/master/setup.py "setup.py") | [Apply pyupgrade 3.9 and EOL 3.8](https://github.com/globocom/m3u8/commit/377d42bc917287d478008cb024afe3855946f0e4 "Apply pyupgrade 3.9 and EOL 3.8  https://peps.python.org/pep-0569/") | 2 years agoNov 11, 2024 |
+  | View all files |
+  
+  ## Repository files navigation
+  
+  ![image](https://github.com/globocom/m3u8/actions/workflows/main.yml/badge.svg)[![image](https://camo.githubusercontent.com/61ea05b276b6ff8c8ec3a2ab8b1c998435231711b8c4cb0a6f1a560fbc99f39f/68747470733a2f2f62616467652e667572792e696f2f70792f6d3375382e737667)](https://badge.fury.io/py/m3u8)
+  
+  # m3u8
+  
+  [Permalink: m3u8](https://github.com/globocom/m3u8#m3u8)
+  
+  Python [m3u8](https://tools.ietf.org/html/rfc8216) parser.
+  
+  # Documentation
+  
+  [Permalink: Documentation](https://github.com/globocom/m3u8#documentation)
+  
+  ## Loading a playlist
+  
+  [Permalink: Loading a playlist](https://github.com/globocom/m3u8#loading-a-playlist)
+  
+  To load a playlist into an object from uri, file path or directly from
+  string, use the `load/loads` functions:
+  
+  ```
+  import m3u8
+  
+  playlist = m3u8.load('http://videoserver.com/playlist.m3u8')  # this could also be an absolute filename
+  print(playlist.segments)
+  print(playlist.target_duration)
+  
+  # if you already have the content as string, use
+  
+  playlist = m3u8.loads('#EXTM3U8 ... etc ... ')
+  ```
+  
+  ## Dumping a playlist
+  
+  [Permalink: Dumping a playlist](https://github.com/globocom/m3u8#dumping-a-playlist)
+  
+  To dump a playlist from an object to the console or a file, use the
+  `dump/dumps` functions:
+  
+  ```
+  import m3u8
+  
+  playlist = m3u8.load('http://videoserver.com/playlist.m3u8')
+  print(playlist.dumps())
+  
+  # if you want to write a file from its content
+  
+  playlist.dump('playlist.m3u8')
+  ```
+  
+  # Supported tags
+  
+  [Permalink: Supported tags](https://github.com/globocom/m3u8#supported-tags)
+  
+  - [#EXT-X-TARGETDURATION](https://tools.ietf.org/html/rfc8216#section-4.3.3.1)
+  - [#EXT-X-MEDIA-SEQUENCE](https://tools.ietf.org/html/rfc8216#section-4.3.3.2)
+  - [#EXT-X-DISCONTINUITY-SEQUENCE](https://tools.ietf.org/html/rfc8216#section-4.3.3.3)
+  - [#EXT-X-PROGRAM-DATE-TIME](https://tools.ietf.org/html/rfc8216#section-4.3.2.6)
+  - [#EXT-X-MEDIA](https://tools.ietf.org/html/rfc8216#section-4.3.4.1)
+  - [#EXT-X-PLAYLIST-TYPE](https://tools.ietf.org/html/rfc8216#section-4.3.3.5)
+  - [#EXT-X-KEY](https://tools.ietf.org/html/rfc8216#section-4.3.2.4)
+  - [#EXT-X-STREAM-INF](https://tools.ietf.org/html/rfc8216#section-4.3.4.2)
+  - [#EXT-X-VERSION](https://tools.ietf.org/html/rfc8216#section-4.3.1.2)
+  - [#EXT-X-ALLOW-CACHE](https://datatracker.ietf.org/doc/html/draft-pantos-http-live-streaming-07#section-3.3.6)
+  - [#EXT-X-ENDLIST](https://tools.ietf.org/html/rfc8216#section-4.3.3.4)
+  - [#EXTINF](https://tools.ietf.org/html/rfc8216#section-4.3.2.1)
+  - [#EXT-X-I-FRAMES-ONLY](https://tools.ietf.org/html/rfc8216#section-4.3.3.6)
+  - [#EXT-X-BITRATE](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4.4.8)
+  - [#EXT-X-BYTERANGE](https://tools.ietf.org/html/rfc8216#section-4.3.2.2)
+  - [#EXT-X-I-FRAME-STREAM-INF](https://tools.ietf.org/html/rfc8216#section-4.3.4.3)
+  - [#EXT-X-IMAGES-ONLY](https://github.com/image-media-playlist/spec/blob/master/image_media_playlist_v0_4.pdf)
+  - [#EXT-X-IMAGE-STREAM-INF](https://github.com/image-media-playlist/spec/blob/master/image_media_playlist_v0_4.pdf)
+  - [#EXT-X-TILES](https://github.com/image-media-playlist/spec/blob/master/image_media_playlist_v0_4.pdf)
+  - [#EXT-X-DISCONTINUITY](https://tools.ietf.org/html/rfc8216#section-4.3.2.3)
+  - #EXT-X-CUE-OUT
+  - #EXT-X-CUE-OUT-CONT
+  - #EXT-X-CUE-IN
+  - #EXT-X-CUE-SPAN
+  - #EXT-OATCLS-SCTE35
+  - [#EXT-X-INDEPENDENT-SEGMENTS](https://tools.ietf.org/html/rfc8216#section-4.3.5.1)
+  - [#EXT-X-MAP](https://tools.ietf.org/html/rfc8216#section-4.3.2.5)
+  - [#EXT-X-START](https://tools.ietf.org/html/rfc8216#section-4.3.5.2)
+  - [#EXT-X-SERVER-CONTROL](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4.3.8)
+  - [#EXT-X-PART-INF](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4.3.7)
+  - [#EXT-X-PART](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4.4.9)
+  - [#EXT-X-RENDITION-REPORT](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4.5.4)
+  - [#EXT-X-SKIP](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis#section-4.4.5.2)
+  - [#EXT-X-SESSION-DATA](https://tools.ietf.org/html/rfc8216#section-4.3.4.4)
+  - [#EXT-X-PRELOAD-HINT](https://datatracker.ietf.org/doc/html/draft-pantos-hls-rfc8216bis-09#section-4.4.5.3)
+  - [#EXT-X-SESSION-KEY](https://tools.ietf.org/html/rfc8216#section-4.3.4.5)
+  - [#EXT-X-DATERANGE](https://tools.ietf.org/html/rfc8216#section-4.3.2.7)
+  - [#EXT-X-GAP](https://tools.ietf.org/html/draft-pantos-hls-rfc8216bis-05#section-4.4.2.7)
+  - [#EXT-X-CONTENT-STEERING](https://tools.ietf.org/html/draft-pantos-hls-rfc8216bis-10#section-4.4.6.64)
+  
+  # Frequently Asked Questions
+  
+  [Permalink: Frequently Asked Questions](https://github.com/globocom/m3u8#frequently-asked-questions)
+  
+  - [FAQ](https://github.com/globocom/m3u8/wiki/FAQ)
+  
+  # Running Tests
+  
+  [Permalink: Running Tests](https://github.com/globocom/m3u8#running-tests)
+  
+  ```
+  $ ./runtests
+  ```
+  
+  # Contributing
+  
+  [Permalink: Contributing](https://github.com/globocom/m3u8#contributing)
+  
+  All contributions are welcome, but we will merge a pull request if, and
+  only if, it
+  
+  - Has tests
+  - Follows the code conventions
+  
+  If you plan to implement a new feature or something that will take more
+  than a few minutes, please open an issue to make sure we don't work on
+  the same thing.
+  
+  ## About
+  
+  Python m3u8 Parser for HTTP Live Streaming (HLS) Transmissions
+  
+  
+  ### Topics
+  
+  [python](https://github.com/topics/python "Topic: python") [parser](https://github.com/topics/parser "Topic: parser") [hls](https://github.com/topics/hls "Topic: hls") [m3u8](https://github.com/topics/m3u8 "Topic: m3u8")
+  
+  ### Resources
+  
+  [Readme](https://github.com/globocom/m3u8#readme-ov-file)
+  
+  ### License
+  
+  [View license](https://github.com/globocom/m3u8#License-1-ov-file)
+  
+  ### Uh oh!
+  
+  There was an error while loading. [Please reload this page](https://github.com/globocom/m3u8).
+  
+  [Activity](https://github.com/globocom/m3u8/activity)
+  
+  [Custom properties](https://github.com/globocom/m3u8/custom-properties)
+  
+  ### Stars
+  
+  [**2.3k**\\
+  stars](https://github.com/globocom/m3u8/stargazers)
+  
+  ### Watchers
+  
+  [**143**\\
+  watching](https://github.com/globocom/m3u8/watchers)
+  
+  ### Forks
+  
+  [**494**\\
+  forks](https://github.com/globocom/m3u8/forks)
+  
+  [Report repository](https://github.com/contact/report-content?content_url=https%3A%2F%2Fgithub.com%2Fglobocom%2Fm3u8&report=globocom+%28user%29)
+  
+  ## [Releases\  50](https://github.com/globocom/m3u8/releases)
+  
+  [6.0.0\\
+  Latest\\
+  \\
+  on Aug 7, 2024Aug 7, 2024](https://github.com/globocom/m3u8/releases/tag/6.0.0)
+  
+  [\+ 49 releases](https://github.com/globocom/m3u8/releases)
+  
+  ## [Packages\  0](https://github.com/orgs/globocom/packages?repo_name=m3u8)
+  
+  No packages published
+  
+  ## [Used by 3.1k](https://github.com/globocom/m3u8/network/dependents)
+  
+  [- ![@seungwonme](https://avatars.githubusercontent.com/u/106901987?s=64&v=4)\\
+  - ![@KashyapTan](https://avatars.githubusercontent.com/u/75853849?s=64&v=4)\\
+  - ![@blueberry-pie-11](https://avatars.githubusercontent.com/u/34809231?s=64&v=4)\\
+  - ![@ink-splatters](https://avatars.githubusercontent.com/u/2706884?s=64&v=4)\\
+  - ![@goldleon](https://avatars.githubusercontent.com/u/18146134?s=64&v=4)\\
+  - ![@Mrgu2](https://avatars.githubusercontent.com/u/86710948?s=64&v=4)\\
+  - ![@dreammis](https://avatars.githubusercontent.com/u/12542216?s=64&v=4)\\
+  - ![@liuyang1](https://avatars.githubusercontent.com/u/3022197?s=64&v=4)\\
+  \\
+  \+ 3,092](https://github.com/globocom/m3u8/network/dependents)
+  
+  ## [Contributors\  83](https://github.com/globocom/m3u8/graphs/contributors)
+  
+  - [![@leandromoreira](https://avatars.githubusercontent.com/u/55913?s=64&v=4)](https://github.com/leandromoreira)
+  - [![@mauricioabreu](https://avatars.githubusercontent.com/u/1437542?s=64&v=4)](https://github.com/mauricioabreu)
+  - [![@igorsobreira](https://avatars.githubusercontent.com/u/81175?s=64&v=4)](https://github.com/igorsobreira)
+  - [![@jbochi](https://avatars.githubusercontent.com/u/292712?s=64&v=4)](https://github.com/jbochi)
+  - [![@daveisfera](https://avatars.githubusercontent.com/u/1686193?s=64&v=4)](https://github.com/daveisfera)
+  - [![@bbayles](https://avatars.githubusercontent.com/u/1922815?s=64&v=4)](https://github.com/bbayles)
+  - [![@flavioribeiro](https://avatars.githubusercontent.com/u/244265?s=64&v=4)](https://github.com/flavioribeiro)
+  - [![@davemevans](https://avatars.githubusercontent.com/u/5390145?s=64&v=4)](https://github.com/davemevans)
+  - [![@birme](https://avatars.githubusercontent.com/u/7220788?s=64&v=4)](https://github.com/birme)
+  - [![@hltbra](https://avatars.githubusercontent.com/u/61387?s=64&v=4)](https://github.com/hltbra)
+  - [![@Neon-Dlea](https://avatars.githubusercontent.com/u/8246156?s=64&v=4)](https://github.com/Neon-Dlea)
+  - [![@feuvan](https://avatars.githubusercontent.com/u/7534?s=64&v=4)](https://github.com/feuvan)
+  - [![@blokfyuh](https://avatars.githubusercontent.com/u/7648848?s=64&v=4)](https://github.com/blokfyuh)
+  - [![@GrumpyOldTroll](https://avatars.githubusercontent.com/u/361578?s=64&v=4)](https://github.com/GrumpyOldTroll)
+  
+  [\+ 69 contributors](https://github.com/globocom/m3u8/graphs/contributors)
+  
+  ## Languages
+  
+  - [Python99.8%](https://github.com/globocom/m3u8/search?l=python)
+  - [Shell0.2%](https://github.com/globocom/m3u8/search?l=shell)
+  
+  You can’t perform that action at this time.
+  --- End Content ---
+
+M3u8 Parser download | SourceForge.net
+  URL: https://sourceforge.net/projects/m3u8parser/
+  Built to your exact specs. Live migration and automatic failover keep workloads online through maintenance. One free e2-micro VM every month.
+
+  --- Content ---
+  - [Join/Login](https://sourceforge.net/auth/)
+  - [Business Software](https://sourceforge.net/software/)
+  - [Open Source Software](https://sourceforge.net/directory/)
+  - [For Vendors](https://sourceforge.net/software/vendors/ "For Vendors")
+  - [Blog](https://sourceforge.net/blog/ "Blog")
+  - [About](https://sourceforge.net/about)
+  - More
+    - [Articles](https://sourceforge.net/articles/)
+    - [Create](https://sourceforge.net/create)
+    - [SourceForge Podcast](https://sourceforge.net/articles/category/sourceforge-podcast/)
+    - [Site Documentation](https://sourceforge.net/p/forge/documentation/Docs%20Home/)
+    - [Subscribe to our Newsletter](https://sourceforge.net/user/newsletters)
+    - [Support Request](https://sourceforge.net/support)
+  
+  [![SourceForge logo](https://a.fsdn.com/con/images/sandiego/sf-logo-full.svg)](https://sourceforge.net/ "Home")
+  
+  [![SourceForge logo](https://a.fsdn.com/con/images/sandiego/sf-logo-full.svg)](https://sourceforge.net/ "Home")
+  
+  # M3u8 Parser
+  
+  Status: Alpha
+  
+  
+  Brought to you by:
+  
+  [dkuffner82](https://sourceforge.net/u/dkuffner82/profile/)
+  
+  [1 Review](https://sourceforge.net/projects/m3u8parser/reviews/ "M3u8 Parser Reviews")
+  
+  **Downloads:** [1 This Week](https://sourceforge.net/projects/m3u8parser/files/stats/timeline "Downloads This Week")
+  
+  **Last Update:** [2014-03-22](https://sourceforge.net/p/m3u8parser/activity/)
+  
+  [![](https://a.fsdn.com/con/images/sandiego/sf-icon-black.svg) Download](https://sourceforge.net/projects/m3u8parser/files/latest/download "Download m3u8parser-0.2.jar from SourceForge  - 17.6 kB")
+  
+  [Share This](https://sourceforge.net/projects/m3u8parser/#)
+  
+  [Share M3u8 Parser on SourceForge on X](https://x.com/share?url=https://sourceforge.net/projects/m3u8parser/&text=Download%20M3u8%20Parser%20on%20SourceForge%20for%20free%21%20 "Share M3u8 Parser on SourceForge on X")[Share M3u8 Parser on SourceForge on facebook](https://www.facebook.com/sharer/sharer.php?u=https://sourceforge.net/projects/m3u8parser/&title=M3u8%20Parser%20on%20SourceForge "Share M3u8 Parser on SourceForge on facebook")[Share M3u8 Parser on SourceForge on LinkedIn](https://www.linkedin.com/shareArticle?mini=true&url=https://sourceforge.net/projects/m3u8parser/&title=M3u8%20Parser%20on%20SourceForge&source=SourceForge.net "Share M3u8 Parser on SourceForge on LinkedIn")
+  
+  ![Email in envelope](https://a.fsdn.com/con/images/sandiego/sf_email_icon.svg)
+  
+  #### Get an email when there's a new version of M3u8 Parser
+  
+  Next
+  
+  - [Summary](https://sourceforge.net/projects/m3u8parser/)
+  - [Files](https://sourceforge.net/projects/m3u8parser/files/)
+  - [Reviews](https://sourceforge.net/projects/m3u8parser/reviews/)
+  - [Support](https://sourceforge.net/projects/m3u8parser/support)
+  - [Code](https://sourceforge.net/p/m3u8parser/code/)
+  - [Bugs](https://sourceforge.net/p/m3u8parser/bugs/)
+  - •••
+    - [Summary](https://sourceforge.net/projects/m3u8parser/)
+    - [Files](https://sourceforge.net/projects/m3u8parser/files/)
+    - [Reviews](https://sourceforge.net/projects/m3u8parser/reviews/)
+    - [Support](https://sourceforge.net/projects/m3u8parser/support)
+    - [Code](https://sourceforge.net/p/m3u8parser/code/)
+    - [Bugs](https://sourceforge.net/p/m3u8parser/bugs/)
+    - •••
+      - [Summary](https://sourceforge.net/projects/m3u8parser/)
+      - [Files](https://sourceforge.net/projects/m3u8parser/files/)
+      - [Reviews](https://sourceforge.net/projects/m3u8parser/reviews/)
+      - [Support](https://sourceforge.net/projects/m3u8parser/support)
+      - [Code](https://sourceforge.net/p/m3u8parser/code/)
+      - [Bugs](https://sourceforge.net/p/m3u8parser/bugs/)
+      - •••
+  
+  A java m3u8 playlist parser for Http Live Streaming. See ietf draft [http://tools.ietf.org/html/draft-pantos-http-live-streaming-02](http://tools.ietf.org/html/draft-pantos-http-live-streaming-02) for details. See See: [http://m3u8parser.chilicat.net](http://m3u8parser.chilicat.net/) for JavaDoc and simple Webstart application to test the parser
+  
+  
+  ### Project Activity
+  
+  [Follow M3u8 Parser - Requires login](https://sourceforge.net/auth/?return_to=%2Fprojects%2Fm3u8parser%2F "Follow M3u8 Parser - Requires login")[RSS](https://sourceforge.net/p/m3u8parser/activity/feed "RSS")
+  
+  - 12 years ago
+  
+  Released
+  [/Snapshot/m3u8parser-application-0.2.jar](http://sourceforge.net/projects/m3u8parser/files/Snapshot/m3u8parser-application-0.2.jar/download)
+  
+  - 12 years ago
+  
+  Released
+  [/Snapshot/m3u8parser-0.2.jar](http://sourceforge.net/projects/m3u8parser/files/Snapshot/m3u8parser-0.2.jar/download)
+  
+  - 12 years ago
+  
+  Daniel Kuffner
+  committed
+  [\[4cb125\]](https://sourceforge.net/p/m3u8parser/code/ci/4cb125feb0a33b9568657a9197e0fbed331cc8dc/)
+  
+  
+  Remove class files from repository
+  
+  
+  - 12 years ago
+  
+  Daniel Kuffner
+  committed
+  [\[d8bc42\]](https://sourceforge.net/p/m3u8parser/code/ci/d8bc42351155e11127850776ae5ad7f92e145d77/)
+  
+  
+  Extended parsing to support EXT-X-STREAM-INF CO...
+  
+  
+  - 12 years ago
+  
+  Daniel Kuffner
+  committed
+  [\[bba7c1\]](https://sourceforge.net/p/m3u8parser/code/ci/bba7c1b194f847d372bbb5b54d2ab8212583e395/)
+  
+  
+  Extended parsing to support EXT-X-STREAM-INF CO...
+  
+  
+  
+  [See All Activity >](https://sourceforge.net/p/m3u8parser/activity/)
+  
+  ### Categories
+  
+  [Multimedia](https://sourceforge.net/directory/multimedia/)
+  
+  ### License
+  
+  GNU Library or Lesser General Public License version 3.0 (LGPLv3)
+  
+  ### Follow M3u8 Parser
+  
+  [M3u8 Parser Web Site](http://m3u8parser.chilicat.net/ "M3u8 Parser Web Site")
+  
+  Other Useful Business Software
+  
+  ![$300 in Free Credit Towards Top Cloud Services](https://sourceforge.net/software/tp3/?b=94483&c=16531&z=91893&cb=975351c752&rand=862dc3e4-ac78-4389-8978-9bc0ac0a373f)
+  
+  ![$300 in Free Credit Towards Top Cloud Services Icon](https://a.fsdn.com/con/app/nel_img/20666)
+  
+  $300 in Free Credit Towards Top Cloud Services
+  
+  Build VMs, containers, AI, databases, storage—all in one place.
+  
+  Start your project in minutes. After credits run out, 20+ products include free monthly usage. Only pay when you're ready to scale.
+  
+  
+  Get Started
+  
+  Rate This Project
+  
+  [Login To Rate This Project](https://sourceforge.net/projects/m3u8parser/reviews/new)
+  
+  ### User Ratings
+  
+  2.0out of 5 stars
+  
+  ★★★★★
+  
+  ★★★★
+  
+  ★★★
+  
+  ★★
+  
+  ★
+  
+  0
+  
+  0
+  
+  0
+  
+  1
+  
+  0
+  
+  ease1 of 52 of 53 of 54 of 55 of 53 / 5
+  
+  
+  features1 of 52 of 53 of 54 of 55 of 53 / 5
+  
+  
+  design1 of 52 of 53 of 54 of 55 of 54 / 5
+  
+  
+  support1 of 52 of 53 of 54 of 55 of 54 / 5
+  
+  
+  ## User Reviews
+  
+  Filter Reviews:
+  
+  All
+  
+  - I highly recommend Allavsoft to downlod  M3U8 files to MP4, AVI, MKV, FLV, MOV and more other popular video formats.
+  
+  
+  
+  [Read more reviews >](https://sourceforge.net/projects/m3u8parser/reviews/#reviews)
+  
+  ### Additional Project Details
+  
+  #### Intended Audience
+  
+  Developers
+  
+  #### Programming Language
+  
+  [Java](https://sourceforge.net/directory/java/)
+  
+  #### Related Categories
+  
+  [Java Multimedia Software](https://sourceforge.net/directory/multimedia/java/)
+  
+  #### Registered
+  
+  2009-12-30
+  
+  
+  [Report inappropriate content](https://sourceforge.net/projects/m3u8parser/report_inappropriate)
+  
+  c.sf-syn.com
+  
+  # c.sf-syn.com is blocked
+  
+  This page has been blocked by an extension
+  
+  - Try disabling your extensions.
+  
+  ERR\_BLOCKED\_BY\_CLIENT
+  
+  Reload
+  
+  
+  This page has been blocked by an extension
+  
+  ![](<Base64-Image-Removed>)![](<Base64-Image-Removed>)
+  
+  This download has been scanned for malware. All downloads on SourceForge are scanned for malware.
+  
+  ![](https://io.narrative.io/?companyId=2440&id=first_party%3A9fcf6f80-8474-4018-a446-c305b5126520&id=site_name%3Asourceforge.net&id=url%3A%2Fprojects%2Fm3u8parser%2F&id=pagetitle%3AM3u8+Parser+download+%7C+SourceForge.net&id=vertical%3AOpen+Source+Software&id=product%3AM3u8+Parser&id=topics%3AMultimedia&id=programming_language%3AJava&rand=1775784220474)
+  --- End Content ---
+
+Max M3u8 Player - Apps on Google Play
+  URL: https://play.google.com/store/apps/details?id=com.aaronmaxlab.maxplayer&hl=en_US
+  It offers a user-friendly interface, adaptive streaming for smooth playback, and support for multiple video formats such as HLS (m3u8), MP4, ...
+
+  --- Content ---
+  ![](https://i.ytimg.com/vi/hY5zZEEavQA/hqdefault.jpg)
+  
+  _play\_arrow_ Trailer
+  
+  ![Icon image](https://play-lh.googleusercontent.com/KmCofWsgU4opJr_7-PCkNpWSoScd5UlskbkGqCwmdEZ76pLxW9bomjv95swuB2eRyAvLKf8w-x2LEvDVbeASCi4=w240-h480-rw)
+  
+  # Max M3u8 Player
+  
+  [Max Lab Solutions](https://play.google.com/store/apps/dev?id=6526491510032796554)
+  
+  Contains ads
+  
+  ![Icon image](https://play-lh.googleusercontent.com/KmCofWsgU4opJr_7-PCkNpWSoScd5UlskbkGqCwmdEZ76pLxW9bomjv95swuB2eRyAvLKf8w-x2LEvDVbeASCi4=s48-rw)
+  
+  5K+
+  
+  Downloads
+  
+  ![Content rating](https://play-lh.googleusercontent.com/IciOnDFecb5Xt50Q2jlcNC0LPI7LEGxNojroo-s3AozcyS-vDCwtq4fn7u3wZmRna8OewG9PBrWC-i7i=w48-h16-rw)
+  
+  Everyone
+  
+  _info_
+  
+  Install
+  
+  Share
+  
+  Add to wishlist
+  
+  _play\_arrow_ Trailer
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/rsbfUruIWN9kKxdyjQyvnrXbcaq3rn1CJ-mTU_nLcrL4zmylFJKgI05fk7IWnq1t0m4oM-OBHLzVcu-XRcIM7g=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/gHmzWUYrkClf3GLDoy4Rexalc6pnfQpheQnGG5oja5QLMHilNzklG-L7p0OuaCs_C_VbOCHaqHjGGD-IqEF8jg=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/00z3Eb9fKu4_AcJ42M9FpHJTaWyNeuerbwrG8NKGPSrxVvwxgjLxxoXFI6P1kXsXoMlUmYCn-Uc8bhowWyA8=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/_5pNOCMgyI2Gu_hnqRDrj49avTn1p9p41HfoM5_4E9g67Qc_hNQFXYzppNZS3bv-U9pQk4O3COJt0f2NUl52h8s=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/TXPdfC7Fvk4cO7-RnnrzB5tU_-rkwf-MIa2xvQF3V-GeaBMfur7PlMBXU4Ucy6rTa4dwycK5VWKXg87HxgSj=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/GMAQdYPcgc3Zp4_YzxuTyMrClsgNkNyn7GtdvRZ6Dye15d8aHizQotbJy88DQoxbJ_FT=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/tkcfXHNR53PfG39gBGWVRn1BWnmuUdJB8hBYze_hOTDel8hhnEQF36rU17J3_5Qi0A=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/moBmJkbxUrkolNSVLXkuAbGtO_3DvZXR2kLogxwTnhr9KFYpBcDHJNSSDkcm0n1Z1qE=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/1-AGLAmclx_lNB6SOhfmmCii5A94BO4kdYxYFSlXyTF9TgZ5mfbYXs6Y41eh9k-ZwFU=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/MdM6CEZt0yav2pi8QizJX0_bW_noO7DAVB0CfFffLoV5mTOa0p4h3nJY0xkAvTL0-eeM=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/n2qBZqjRi_hmtFNtxYl3NLh4p-StsacRMSP4PRBYerNs0rOeTB_8glePmBx2u2fSmw=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/Vw_ET6ZeRpEFBqQFTe_WkUSeMHy9PgMxl8zE2ibe4TdbkNV-Bidy2-OSis-JiD_WPLDb=w526-h296-rw)
+  
+  ![Screenshot image](https://play-lh.googleusercontent.com/NxLMOZPMDg6D98Gz2U5eCejjk0rvMR5vPANlWaZ_b4SIEnWUPKh_top_v3H77kWiKw=w526-h296-rw)
+  
+  _chevron\_right_
+  
+  Max Player is a simple and powerful video player application that can play valid online video URLs. It offers a user-friendly interface, adaptive streaming for smooth playback, and support for multiple video formats such as HLS (m3u8), MP4, DASH, and more.
+  
+  Powered by the MPV media engine, Max Player ensures reliable performance and high-quality playback across a wide range of devices.
+  
+  Enjoy your favorite video content conveniently on your Android device with this versatile player.
+  
+  Key Features:
+  
+  Video Streaming
+  
+  Play video streams from remote servers or online sources easily.
+  
+  Adaptive Streaming
+  
+  Automatically adjusts video quality based on your internet speed to reduce buffering and provide a smooth experience.
+  
+  User-Friendly Interface
+  
+  Simple controls including play, pause, seek, volume, screen rotation, and full-screen mode.
+  
+  Playlist Management
+  
+  Create, organize, and manage playlists for quick access to your favorite content.
+  
+  Customization Options
+  
+  Adjust playback speed, brightness, and aspect ratio to suit your viewing preferences.
+  
+  Wide Compatibility
+  
+  Works across a variety of Android devices and supports multiple video formats.
+  
+  The app does not provide any content. Users must supply their own media URLs.
+  
+  Updated on
+  
+  Apr 2, 2026
+  
+  Video Players & Editors [Video Players & Editors](https://play.google.com/store/apps/category/VIDEO_PLAYERS)
+  
+  Safety starts with understanding how developers collect and share your data. Data privacy and security practices may vary based on your use, region, and age. The developer provided this information and may update it over time.
+  
+  ![Icon image](https://play-lh.googleusercontent.com/iFstqoxDElUVv4T3KxkxP3OTcuFvWF5ZQQjT7aIxy4n2uaVigCCykxeG6EZV9FQ10X1itPj1oORm=s20-rw)
+  
+  This app may share these data types with third parties
+  
+  App info and performance and Device or other IDs
+  
+  ![Icon image](https://play-lh.googleusercontent.com/12USW7aflgz466ifDehKTnMoAep_VHxDmKJ6jEBoDZWCSefOC-ThRX14Mqe0r8KF9XCzrpMqJts=s20-rw)
+  
+  No data collected
+  
+  [Learn more](https://support.google.com/googleplay?p=data-safety&hl=en) about how developers declare collection
+  
+  ![Icon image](https://play-lh.googleusercontent.com/W5DPtvB8Fhmkn5LbFZki_OHL3ZI1Rdc-AFul19UK4f7np2NMjLE5QquD6H0HAeEJ977u3WH4yaQ=s20-rw)
+  
+  Data is encrypted in transit
+  
+  ![Icon image](https://play-lh.googleusercontent.com/neRBP16KYqhC7f1N3vUT1Q_HMLwAw7vXu8aOWOqvlY3JXNGd8qyXVNyAQyNLpdUdCV0kYEs9BXk=s20-rw)
+  
+  Data can’t be deleted
+  
+  See details [See more details on data safety](https://play.google.com/store/apps/datasafety?id=com.aaronmaxlab.maxplayer)
+  
+  Updated video player to MPV engine.
+  
+  Improved playback performance and compatibility.
+  
+  Fixed buffering and streaming issues.
+  
+  [_flag_ Flag as inappropriate](https://support.google.com/googleplay/?p=report_content)
+  
+  [_email_ \\
+  \\
+  Support email\\
+  \\
+  aarons.maxlab@gmail.com](mailto:aarons.maxlab@gmail.com)
+  
+  [_shield_ \\
+  \\
+  Privacy Policy](https://sites.google.com/view/max-player-privacy-policy)
+  
+  About the developer
+  
+  Sreedevi
+  
+  contact.maxlabonline@gmail.com
+  
+  India
+  
+  [![Thumbnail image](https://play-lh.googleusercontent.com/ChB_fYkCLDo_4TztUygTlKj9InPHsw8SaweuTtTO4dfPie9cLy_oBOFuPOXD5oHvR3XR55FLVFXufeY3fZ4IDw=s64-rw)\\
+  \\
+  Talk ToolBox - Malayalam\\
+  \\
+  Max Lab Solutions](https://play.google.com/store/apps/details?id=com.aaronmaxlab.talktoolbox)
+  
+  [![Thumbnail image](https://play-lh.googleusercontent.com/34ZfHMGob5b1JUJsl8Lkmw5CMZkOahE6iowkkkzV_LwH6gSdDMZY-4pPmKzaWkM-zg=s64-rw)\\
+  \\
+  Vachanapetty\\
+  \\
+  Max Lab Solutions](https://play.google.com/store/apps/details?id=com.aaronmaxlab.vachanapetty)
+  
+  [_flag_ Flag as inappropriate](https://support.google.com/googleplay/?p=report_content)
+  
+  reCAPTCHA
+  
+  Recaptcha requires verification.
+  
+  protected by **reCAPTCHA**
+  
+  reCAPTCHA is changing its terms of service. [Take action.](https://google.com/recaptcha/admin/migrate)
+  --- End Content ---
+
+M3U8 Stream Player: TV & Video - App Store - Apple
+  URL: https://apps.apple.com/jp/app/m3u8-stream-player-tv-video/id604384221?l=en-US&platform=vision
+  This is a stream player that can read every stream in the m3u8,m3u format. Add the URL of a TV channel, a video, or an playlist and start playback.
+
+  --- Content ---
+  # M3U8 Stream Player: TV & Video
+  
+  Film, iptv, musique en live
+  
+  Free · In‑App Purchases · Designed for iPad. Not verified for macOS.
+  
+  - [Ages\\
+  \\
+  4+\\
+  \\
+  Years](https://apps.apple.com/jp/app/m3u8-stream-player-tv-video/id604384221?l=en-US&platform=vision#information)
+  
+  - [Category\\
+  \\
+  ![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  Photo & Video](https://apps.apple.com/jp/app/m3u8-stream-player-tv-video/id604384221?l=en-US&platform=vision#information)
+  
+  - [Developer\\
+  \\
+  Heitz Bruno](https://apps.apple.com/jp/developer/heitz-bruno/id556457592?l=en-US&platform=vision)
+  
+  - [Language\\
+  \\
+  EN\\
+  \+ 2 More](https://apps.apple.com/jp/app/m3u8-stream-player-tv-video/id604384221?l=en-US&platform=vision#information)
+  
+  - [Size\\
+  \\
+  55.6\\
+  \\
+  MB](https://apps.apple.com/jp/app/m3u8-stream-player-tv-video/id604384221?l=en-US&platform=vision#information)
+  
+  
+  - ![](https://apps.apple.com/assets/artwork/1x1.gif)
+  
+  - ![](https://apps.apple.com/assets/artwork/1x1.gif)
+  
+  - ![](https://apps.apple.com/assets/artwork/1x1.gif)
+  
+  - ![](https://apps.apple.com/assets/artwork/1x1.gif)
+  
+  - ![](https://apps.apple.com/assets/artwork/1x1.gif)
+  
+  - ![](https://apps.apple.com/assets/artwork/1x1.gif)
+  
+  - ![](https://apps.apple.com/assets/artwork/1x1.gif)
+  
+  - ![](https://apps.apple.com/assets/artwork/1x1.gif)
+  
+  
+  iPad, iPhone
+  
+  This is a stream player that can read every stream in the m3u8,m3u format.
+  
+  Add the URL of a TV channel, a video, or an playlist and start playback.
+  
+  You can add as many url as you wish, all this is 100% FREE
+  
+  ## Ratings & Reviews
+  
+  - This app hasn’t received enough ratings or reviews to display an overview.
+  
+  
+  ## What’s New
+  
+  # Version History
+  
+  - \- Bug fixes and performance improvements
+  
+  
+  
+  2.1710/21/2025
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.1608/04/2025
+  
+  - \- Added Share and Rate features in the side menu
+  \- Added icons to the menu for a better navigation
+  
+  
+  
+  2.1504/19/2025
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.1404/03/2025
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.1303/19/2025
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.1203/02/2025
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.1102/26/2025
+  
+  - Fixed the bug where the video would not stop when going back
+  
+  
+  
+  2.1002/23/2025
+  
+  - A few tweaks, some cleaning up, and the app is now ready to run on iOS 18!
+  
+  
+  
+  2.0911/12/2024
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.0808/04/2024
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.0707/11/2024
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.0604/11/2024
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.0502/13/2024
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.0412/16/2022
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.0309/23/2022
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.0208/17/2022
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  2.0107/14/2022
+  
+  - \- Application entirely rewritten in Swift
+  \- More modern interface
+  \- Addition of a side menu
+  \- Possibility to put a video in "picture in picture"
+  
+  
+  
+  2.0003/16/2022
+  
+  - Bug fixes and performance improvements
+  
+  
+  
+  1.3203/03/2020
+  
+  - \- Updated third-party file
+  
+  
+  
+  1.3107/03/2019
+  
+  - \- Updated third-party file
+  
+  
+  
+  1.3002/05/2019
+  
+  - \- Fixed demo stream
+  
+  
+  
+  1.2912/14/2018
+  
+  - \- Updated third-party file
+  
+  
+  
+  1.2806/13/2018
+  
+  - \- Updated third-party file
+  
+  
+  
+  1.2710/19/2017
+  
+  - \- Updated third-party file
+  
+  
+  
+  1.2608/20/2017
+  
+  
+  \- Bug fixes and performance improvements
+  
+  Version 2.1710/21/2025
+  
+  [**App Privacy**](https://apps.apple.com/jp/app/m3u8-stream-player-tv-video/id604384221?l=en-US&platform=vision#)
+  
+  # App Privacy
+  
+  The developer, **Heitz Bruno**, indicated that the app’s privacy practices may include handling of data as described below. This information has not been verified by Apple. For more information, see the [developer’s privacy policy](https://github.com/SmartHbdev/privpolicy).
+  
+  To help you better understand the developer’s responses, see [Privacy Definitions and Examples](https://apps.apple.com/jp/vision/story/id1539235847?l=en-US).
+  
+  Privacy practices may vary, for example, based on the features you use or your age. [Learn More](https://apps.apple.com/jp/vision/story/id1538632801?l=en-US)
+  
+  ### Data Used to Track You
+  
+  The following data may be used to track you across apps and websites owned by other companies:
+  
+  - Location
+  - Identifiers
+  - Usage Data
+  - Diagnostics
+  
+  ### Data Not Linked to You
+  
+  The following data, which may be collected but is not linked to your identity, may be used for the following purposes:
+  
+  #### Third-Party Advertising
+  
+  Location
+  - Coarse Location
+  Identifiers
+  - Device ID
+  Usage Data
+  - Product Interaction
+  - Advertising Data
+  
+  #### Analytics
+  
+  Location
+  - Coarse Location
+  Identifiers
+  - Device ID
+  Usage Data
+  - Product Interaction
+  - Advertising Data
+  Diagnostics
+  - Crash Data
+  - Performance Data
+  
+  The developer, **Heitz Bruno**, indicated that the app’s privacy practices may include handling of data as described below. For more information, see the [developer’s privacy policy](https://github.com/SmartHbdev/privpolicy).
+  
+  - ### Data Used to Track You
+  
+  
+  
+  The following data may be used to track you across apps and websites owned by other companies:
+  
+  
+  
+    - Location
+    - Identifiers
+    - Usage Data
+    - Diagnostics
+  
+  - ### Data Not Linked to You
+  
+  
+  
+  The following data may be collected but it is not linked to your identity:
+  
+  
+  
+    - Location
+    - Identifiers
+    - Usage Data
+    - Diagnostics
+  
+  Privacy practices may vary, for example, based on the features you use or your age. [Learn More](https://apps.apple.com/jp/vision/story/id1538632801?l=en-US)
+  
+  ## Accessibility
+  
+  The developer has not yet indicated which accessibility features this app supports. [Learn More](https://apps.apple.com/story/id1814164299)
+  
+  ## Information
+  
+  Seller
+  
+  - Heitz Bruno
+  
+  Size
+  
+  - 55.6 MB
+  
+  Category
+  
+  - Photo & Video
+  
+  CompatibilityRequires iOS 15.6 or later.
+  
+  - **iPhone**
+  
+  Requires iOS 15.6 or later.
+  
+  - **iPad**
+  
+  Requires iPadOS 15.6 or later.
+  
+  - **iPod touch**
+  
+  Requires iOS 15.6 or later.
+  
+  - **Mac**
+  
+  Requires macOS 12.5 or later and a Mac with Apple M1 chip or later.
+  
+  - **Apple Vision**
+  
+  Requires visionOS 1.0 or later.
+  
+  LanguagesEnglish and 2 more
+  
+  - English, French, Spanish
+  
+  Age Rating4+
+  
+  - 4+
+  
+  - [Learn More](https://apps.apple.com/jp/vision/story/id1825160725?l=en-US)
+  
+  
+  In-App PurchasesYes
+  
+  - Pro Version¥500
+  
+  - [Learn More](https://apps.apple.com/jp/vision/story/id1436214772?l=en-US)
+  
+  
+  Copyright
+  
+  - © 2012 Heitz Bruno
+  
+  [Developer Website](http://apps-hb.com/)
+  
+  [Privacy Policy](https://github.com/SmartHbdev/privpolicy)
+  
+  [**More by Heitz Bruno**](https://apps.apple.com/jp/developer/heitz-bruno/id556457592?l=en-US)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Planet Cam: Earth Live Webcams**\\
+  \\
+  Travel the world with maps\\
+  \\
+  View](https://apps.apple.com/jp/app/planet-cam-earth-live-webcams/id594760349?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Heden VisionCam - IP Camera**\\
+  \\
+  Watch your IP cameras\\
+  \\
+  View](https://apps.apple.com/jp/app/heden-visioncam-ip-camera/id566067357?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Camarade pour Freebox V6**\\
+  \\
+  Productivity\\
+  \\
+  View](https://apps.apple.com/jp/app/camarade-pour-freebox-v6/id982931090?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Aquarium Manager: Tank Log**\\
+  \\
+  Fish, plant & water keeping\\
+  \\
+  View](https://apps.apple.com/jp/app/aquarium-manager-tank-log/id614505498?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Bitwisdom: Crypto Tracker**\\
+  \\
+  Track Bitcoin & Cryptocurrency\\
+  \\
+  View](https://apps.apple.com/jp/app/bitwisdom-crypto-tracker/id978736047?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Guide TV pour Freebox v6**\\
+  \\
+  Entertainment\\
+  \\
+  View](https://apps.apple.com/jp/app/guide-tv-pour-freebox-v6/id951877131?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **AirSS - Fast Rss reader**\\
+  \\
+  RSS reader with audio, OPML\\
+  \\
+  View](https://apps.apple.com/jp/app/airss-fast-rss-reader/id675290815?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Multiposte pour Freebox TV**\\
+  \\
+  Entertainment\\
+  \\
+  View](https://apps.apple.com/jp/app/multiposte-pour-freebox-tv/id1161694073?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **TV pour Freebox Révolution v6**\\
+  \\
+  Entertainment\\
+  \\
+  View](https://apps.apple.com/jp/app/tv-pour-freebox-r%C3%A9volution-v6/id780438656?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Watched TV: Movies & TV Shows**\\
+  \\
+  Favorite video & media tracker\\
+  \\
+  View](https://apps.apple.com/jp/app/watched-tv-movies-tv-shows/id1189992847?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Did you know? Swipe fun facts**\\
+  \\
+  Learn daily interesting things\\
+  \\
+  View](https://apps.apple.com/jp/app/did-you-know-swipe-fun-facts/id563443974?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Zapette pour Freebox**\\
+  \\
+  Utilities\\
+  \\
+  View](https://apps.apple.com/jp/app/zapette-pour-freebox/id985107796?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **What is behind ?**\\
+  \\
+  Guess the word from image\\
+  \\
+  View](https://apps.apple.com/jp/app/what-is-behind/id625107769?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **My Shopping List & Recipe**\\
+  \\
+  List with recipes & store\\
+  \\
+  View](https://apps.apple.com/jp/app/my-shopping-list-recipe/id593261503?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Crossibus - Word Search Puzzle**\\
+  \\
+  Relaxing Word Puzzle Game\\
+  \\
+  View](https://apps.apple.com/jp/app/crossibus-word-search-puzzle/id556457589?l=en-US&platform=vision)
+  
+  
+  [**You Might Also Like**](https://apps.apple.com/jp/app/604384221?l=en-US&see-all=customers-also-bought-apps&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **ProgTV**\\
+  \\
+  IPTV,OTT,TV/Radio player\\
+  \\
+  View](https://apps.apple.com/jp/app/progtv/id1447796133?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **IPTV Streamer Max**\\
+  \\
+  IPTV the way you like it!\\
+  \\
+  View](https://apps.apple.com/jp/app/iptv-streamer-max/id1562117654?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Wise ipTV Player**\\
+  \\
+  Photo & Video\\
+  \\
+  View](https://apps.apple.com/jp/app/wise-iptv-player/id6447429344?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **IP Television - IPTV M3U**\\
+  \\
+  Watch IPTV with M3U or Xtream\\
+  \\
+  View](https://apps.apple.com/jp/app/ip-television-iptv-m3u/id884206090?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **ARC Player**\\
+  \\
+  Fast OTT & IPTV Media Player\\
+  \\
+  View](https://apps.apple.com/jp/app/arc-player/id6449966365?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Live TV Player**\\
+  \\
+  IPTV Player\\
+  \\
+  View](https://apps.apple.com/jp/app/live-tv-player/id6448868009?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Super Stream Player**\\
+  \\
+  Photo & Video\\
+  \\
+  View](https://apps.apple.com/jp/app/super-stream-player/id1287070962?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **iMPlayer IPTV Player**\\
+  \\
+  Photo & Video\\
+  \\
+  View](https://apps.apple.com/jp/app/implayer-iptv-player/id6695725513?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Video Player - PIP and more**\\
+  \\
+  Powerful video player\\
+  \\
+  View](https://apps.apple.com/jp/app/video-player-pip-and-more/id1610938825?l=en-US&platform=vision)
+  
+  - [![](https://apps.apple.com/assets/artwork/1x1.gif)\\
+  \\
+  **Larix Player**\\
+  \\
+  SRT, Icecast and SLDP player\\
+  \\
+  View](https://apps.apple.com/jp/app/larix-player/id1238237026?l=en-US&platform=vision)
+  --- End Content ---
