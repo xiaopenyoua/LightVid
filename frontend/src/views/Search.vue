@@ -1,86 +1,98 @@
 <template>
   <div class="search-page">
-    <div class="search-bar">
-      <el-input v-model="keyword" placeholder="搜索视频名称..." style="width: 400px" @keyup.enter="handleSearch" />
-      <el-button type="primary" @click="handleSearch" :loading="searching">搜索</el-button>
-      <el-select v-model="mediaType" style="width: 120px">
-        <el-option label="电影" value="movie" />
-        <el-option label="剧集" value="tv" />
-      </el-select>
+    <div class="search-header">
+      <h1>搜索</h1>
+      <el-input v-model="keyword" placeholder="输入关键词搜索..." style="width: 400px" @keyup.enter="doSearch" />
     </div>
-    <div class="crawl-bar">
-      <el-input v-model="tmdbId" placeholder="输入 TMDB ID（如 550）" style="width: 400px" @keyup.enter="handleCrawl" />
-      <el-button type="success" @click="handleCrawl" :loading="crawling">添加到本地</el-button>
-    </div>
-    <div v-loading="loading" class="results">
-      <PosterWall :videos="videos" @select="handleSelect" />
-      <el-empty v-if="!loading && videos.length === 0" description="暂无数据，请搜索或添加视频" />
+    <div v-loading="loading" class="search-results">
+      <div v-if="results.length" class="results-grid">
+        <div v-for="item in results" :key="`${item.tmdb_id}-${item.season_number || 0}`" class="result-item" @click="goDetail(item)">
+          <img :src="item.poster_url" />
+          <div class="result-info">
+            <h3>{{ item.title }}</h3>
+            <span class="media-type">{{ item.media_type === 'movie' ? '电影' : '剧集' }}</span>
+          </div>
+        </div>
+      </div>
+      <el-empty v-else-if="!loading && searched" description="未找到结果" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
-import { searchTmdb, crawlVideo } from '../api'
-import PosterWall from '../components/PosterWall.vue'
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { searchVideos } from '../api'
 
+const route = useRoute()
 const router = useRouter()
 const keyword = ref('')
-const tmdbId = ref('')
-const videos = ref([])
-const searching = ref(false)
-const crawling = ref(false)
+const results = ref([])
 const loading = ref(false)
-const mediaType = ref('movie')
+const searched = ref(false)
 
-const handleSearch = async () => {
-  if (!keyword.value) return
-  searching.value = true
+const doSearch = async () => {
+  if (!keyword.value.trim()) return
+  loading.value = true
+  searched.value = false
   try {
-    const { data } = await searchTmdb(keyword.value, mediaType.value)
-    videos.value = data
-    if (data.length === 0) {
-      ElMessage.info('未找到匹配的视频')
-    }
-  } catch (err) {
-    ElMessage.error('搜索失败')
+    const { data } = await searchVideos(keyword.value)
+    results.value = data
+  } catch {
+    results.value = []
   } finally {
-    searching.value = false
+    loading.value = false
+    searched.value = true
   }
 }
 
-const handleCrawl = async () => {
-  if (!tmdbId.value) return
-  crawling.value = true
-  try {
-    await crawlVideo(tmdbId.value, mediaType.value)
-    ElMessage.success('添加成功')
-    // 重新搜索显示最新结果
-    await handleSearch()
-  } catch (err) {
-    ElMessage.error('添加失败，请检查 TMDB ID 是否正确')
-  } finally {
-    crawling.value = false
-  }
+const goDetail = (item) => {
+  router.push(`/video/${item.media_type}/${item.tmdb_id}`)
 }
 
-const handleSelect = (video) => {
-  router.push(`/video/${video.tmdb_id}`)
-}
+onMounted(() => {
+  if (route.query.q) {
+    keyword.value = route.query.q
+    doSearch()
+  }
+})
 </script>
 
 <style scoped>
 .search-page {
   padding: 20px;
 }
-.search-bar, .crawl-bar {
+.search-header {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
 }
-.results {
-  min-height: 200px;
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+.result-item {
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+.result-item img {
+  width: 100%;
+  aspect-ratio: 2/3;
+  object-fit: cover;
+}
+.result-info {
+  padding: 12px;
+}
+.result-info h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+.media-type {
+  font-size: 12px;
+  color: #999;
 }
 </style>
