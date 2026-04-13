@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="header">
-      <h1>LightVid 轻影</h1>
+      <h1>轻影</h1>
       <el-input v-model="keyword" placeholder="搜索..." style="width: 300px" @keyup.enter="handleSearch" />
     </div>
     <div v-loading="loading" class="content">

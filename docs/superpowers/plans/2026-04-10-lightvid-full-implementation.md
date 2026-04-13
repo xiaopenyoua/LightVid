@@ -226,7 +226,7 @@ export default defineConfig({
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LightVid - 轻影</title>
+  <title>轻影</title>
 </head>
 <body>
   <div id="app"></div>
@@ -1166,7 +1166,7 @@ defineEmits(['select'])
 <template>
   <div class="home">
     <div class="header">
-      <h1>LightVid 轻影</h1>
+      <h1>轻影</h1>
       <el-input v-model="keyword" placeholder="搜索..." style="width: 300px" @keyup.enter="handleSearch" />
       <el-tabs v-model="category" @tab-change="loadVideos">
         <el-tab-pane label="全部" name="all" />
