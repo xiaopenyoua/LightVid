@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from database import get_db
 from models.favorite import Favorite
-from models.douban_video import DoubanVideo
 
 router = APIRouter(prefix="/api/favorites", tags=["favorites"])
 
@@ -11,22 +10,14 @@ router = APIRouter(prefix="/api/favorites", tags=["favorites"])
 @router.get("")
 def get_favorites(db: Session = Depends(get_db)):
     favorites = db.query(Favorite).order_by(Favorite.created_at.desc()).all()
-    result = []
-    for f in favorites:
-        video = db.query(DoubanVideo).filter_by(tmdb_id=f.tmdb_id).first()
-        if video:
-            result.append({
-                "id": f.id,
-                "tmdb_id": f.tmdb_id,
-                "created_at": f.created_at,
-                "video": {
-                    "title": video.title,
-                    "poster_url": video.poster_url,
-                    "rating": video.rating,
-                    "year": video.year,
-                }
-            })
-    return result
+    return [
+        {
+            "id": f.id,
+            "tmdb_id": f.tmdb_id,
+            "created_at": f.created_at,
+        }
+        for f in favorites
+    ]
 
 
 @router.post("")

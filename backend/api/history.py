@@ -2,32 +2,24 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 from models.watch_history import WatchHistory
-from models.douban_video import DoubanVideo
-from schemas.watch_history import WatchHistoryResponse
 
 router = APIRouter(prefix="/api/history", tags=["history"])
 
 
-@router.get("", response_model=list[WatchHistoryResponse])
+@router.get("")
 def get_history(db: Session = Depends(get_db)):
     items = db.query(WatchHistory).order_by(WatchHistory.last_watched.desc()).limit(50).all()
-    result = []
-    for item in items:
-        video = db.query(DoubanVideo).filter_by(tmdb_id=item.tmdb_id).first()
-        result.append({
+    return [
+        {
             "id": item.id,
             "tmdb_id": item.tmdb_id,
             "source_id": item.source_id,
             "progress": item.progress,
             "duration": item.duration,
             "last_watched": item.last_watched,
-            "video": {
-                "title": video.title,
-                "poster_url": video.poster_url,
-                "rating": video.rating,
-            } if video else None
-        })
-    return result
+        }
+        for item in items
+    ]
 
 
 @router.get("/{tmdb_id}")
@@ -35,7 +27,6 @@ def get_history_by_tmdb(tmdb_id: int, db: Session = Depends(get_db)):
     item = db.query(WatchHistory).filter_by(tmdb_id=tmdb_id).first()
     if not item:
         return None
-    video = db.query(DoubanVideo).filter_by(tmdb_id=item.tmdb_id).first()
     return {
         "id": item.id,
         "tmdb_id": item.tmdb_id,
@@ -43,11 +34,6 @@ def get_history_by_tmdb(tmdb_id: int, db: Session = Depends(get_db)):
         "progress": item.progress,
         "duration": item.duration,
         "last_watched": item.last_watched,
-        "video": {
-            "title": video.title,
-            "poster_url": video.poster_url,
-            "rating": video.rating,
-        } if video else None
     }
 
 

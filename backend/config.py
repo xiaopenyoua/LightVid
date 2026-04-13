@@ -13,6 +13,9 @@ DATABASE_URL = f"sqlite:///{DATA_DIR / 'lightvid.db'}"
 
 # TMDB API 配置
 TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
+
+# 默认语言
+LANGUAGE = "zh-CN"
 TMDB_BASE_URL = os.getenv("TMDB_BASE_URL", "https://api.themoviedb.org/3")
 
 # 预置解析接口配置

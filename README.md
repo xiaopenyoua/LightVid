@@ -60,7 +60,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # 启动服务 (http://127.0.0.1:18668)
-python main.py
+uv run uvicorn main:app --host 0.0.0.0 --port 18668
 ```
 
 ### 前端

@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from typing import Optional
 
+from .tmdb_genre import TmdbGenreResponse
+
 
 class TmdbCachedItemResponse(BaseModel):
     tmdb_id: int
@@ -23,7 +25,3 @@ class TmdbCachedItemResponse(BaseModel):
 class TmdbCachedListResponse(BaseModel):
     genres: list[TmdbGenreResponse]
     lists: dict[str, list[TmdbCachedItemResponse]]
-
-
-# Need to import TmdbGenreResponse in this file
-from .tmdb_genre import TmdbGenreResponse
