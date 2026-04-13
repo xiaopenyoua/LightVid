@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/videos", tags=["videos"])
 # ============ 首页全量数据 ============
 
 @router.get("/home")
-def get_home(db: Session = Depends(get_db)):
+async def get_home(db: Session = Depends(get_db)):
     """
     首页全量数据：
     - 所有类型列表
@@ -28,6 +28,10 @@ def get_home(db: Session = Depends(get_db)):
     """
     # 获取所有 Genre
     genres = db.query(TmdbGenre).all()
+
+    # 获取 trending/all/day 用于首页轮播（实时，不走缓存保证新鲜度）
+    trending_all_raw = await tmdb_service.get_trending(media_type="all", time_window="day")
+    trending_all = [tmdb_service.format_tmdb_item(r) for r in trending_all_raw[:10]]
 
     # 获取所有缓存列表
     lists = {}
@@ -42,6 +46,7 @@ def get_home(db: Session = Depends(get_db)):
     return {
         "genres": [TmdbGenreResponse.model_validate(g) for g in genres],
         "lists": {k: [TmdbCachedItemResponse.model_validate(i) for i in v] for k, v in lists.items()},
+        "trending_all": [TmdbCachedItemResponse.model_validate(t) for t in trending_all],
     }
 
 
