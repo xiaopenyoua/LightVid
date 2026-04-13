@@ -15,7 +15,7 @@
           <div class="film-info">
             <div class="rating">⭐ {{ item.vote_average?.toFixed(1) }}</div>
             <div class="tags" v-if="item.genre_ids">
-              <span class="tag" v-for="gid in (item.genre_ids.split(',').slice(0, 2))" :key="gid">
+              <span class="tag" v-for="gid in getGenreIds(item)" :key="gid">
                 {{ genreName(gid) }}
               </span>
             </div>
@@ -49,6 +49,12 @@ const handlePlay = (item) => emit('play', item)
 const genreName = (gid) => {
   const g = props.genres.find(g => g.tmdb_id === Number(gid))
   return g ? g.name : ''
+}
+
+const getGenreIds = (item) => {
+  if (!item.genre_ids) return []
+  if (Array.isArray(item.genre_ids)) return item.genre_ids.slice(0, 2)
+  return String(item.genre_ids).split(',').slice(0, 2)
 }
 </script>
 
