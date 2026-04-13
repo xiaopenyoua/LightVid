@@ -1,81 +1,56 @@
 <template>
   <div class="home">
-    <div class="header">
-      <h1>轻影</h1>
-      <el-input v-model="keyword" placeholder="搜索..." style="width: 300px" @keyup.enter="handleSearch" />
-    </div>
-    <div v-loading="loading" class="content">
-      <!-- 顶部轮播 -->
-      <div class="carousel-section" v-if="homeData?.lists?.trending_movie?.length">
-        <Carousel :items="homeData.lists.trending_movie.slice(0, 10)" @select="handleSelect" />
+    <!-- Navigation -->
+    <nav class="nav">
+      <div class="nav-logo">轻影</div>
+      <ul class="nav-links">
+        <li><a href="#" class="active">首页</a></li>
+        <li><a href="#">电影</a></li>
+        <li><a href="#">剧集</a></li>
+        <li><a href="#">综艺</a></li>
+        <li><a href="#">动漫</a></li>
+      </ul>
+      <div class="nav-actions">
+        <input type="text" class="nav-search" placeholder="搜索电影、剧集..." @keyup.enter="handleSearch" v-model="keyword" />
+        <button class="nav-btn">👤</button>
       </div>
+    </nav>
 
-      <!-- 横向滚动分区 -->
-      <VideoRow
-        v-if="homeData?.lists?.popular_movie?.length"
-        title="热门电影"
-        :items="homeData.lists.popular_movie"
-        @select="handleSelect"
+    <!-- Hero Section: Full-Screen Carousel -->
+    <HeroCarousel
+      v-if="homeData?.trending_all?.length"
+      :items="homeData.trending_all"
+      @select="handleSelect"
+      @play="handlePlay"
+      @favorite="handleFavorite"
+    />
+
+    <!-- Content Section: Genre Sidebar + Film Grid -->
+    <section class="content-section">
+      <GenreSidebar
+        :genres="filteredGenres"
+        @select="handleGenreSelect"
       />
 
-      <VideoRow
-        v-if="homeData?.lists?.popular_tv?.length"
-        title="热门剧集"
-        :items="homeData.lists.popular_tv"
-        @select="handleSelect"
-      />
+      <main class="content-area">
+        <div class="content-header">
+          <div class="content-title">
+            <h2>{{ currentGenre.name }}</h2>
+            <span class="genre-tag" v-if="currentGenre.name !== '热门推荐'">按分类浏览</span>
+          </div>
+        </div>
 
-      <VideoRow
-        v-if="homeData?.lists?.trending_movie?.length"
-        title="本周热门"
-        :items="homeData.lists.trending_movie"
-        @select="handleSelect"
-      />
-
-      <VideoRow
-        v-if="homeData?.lists?.top_rated_movie?.length"
-        title="高分电影"
-        :items="homeData.lists.top_rated_movie"
-        @select="handleSelect"
-      />
-
-      <VideoRow
-        v-if="homeData?.lists?.top_rated_tv?.length"
-        title="高分剧集"
-        :items="homeData.lists.top_rated_tv"
-        @select="handleSelect"
-      />
-
-      <VideoRow
-        v-if="homeData?.lists?.upcoming_movie?.length"
-        title="即将上映"
-        :items="homeData.lists.upcoming_movie"
-        @select="handleSelect"
-      />
-
-      <!-- Genre 分区（按类型） -->
-      <template v-if="movieGenres.length">
-        <VideoRow
-          v-for="genre in movieGenres"
-          :key="`movie-${genre.tmdb_id}`"
-          :title="`${genre.name}电影`"
-          :items="genreMovies[genre.tmdb_id] || []"
+        <div v-if="loading" v-loading="true" style="min-height: 400px;"></div>
+        <FilmGrid
+          v-else-if="currentItems.length"
+          :items="currentItems"
+          :genres="allGenres"
           @select="handleSelect"
+          @play="handlePlay"
         />
-      </template>
-
-      <template v-if="tvGenres.length">
-        <VideoRow
-          v-for="genre in tvGenres"
-          :key="`tv-${genre.tmdb_id}`"
-          :title="`${genre.name}剧集`"
-          :items="genreTv[genre.tmdb_id] || []"
-          @select="handleSelect"
-        />
-      </template>
-
-      <el-empty v-if="!loading && !homeData" description="暂无数据" />
-    </div>
+        <el-empty v-else description="暂无数据" />
+      </main>
+    </section>
   </div>
 </template>
 
@@ -83,84 +58,193 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getHome, getMovies, getTvShows } from '../api'
-import Carousel from '../components/Carousel.vue'
-import VideoRow from '../components/VideoRow.vue'
+import { getHome, getMovies, getTvShows, addFavorite } from '../api'
+import HeroCarousel from '../components/HeroCarousel.vue'
+import GenreSidebar from '../components/GenreSidebar.vue'
+import FilmGrid from '../components/FilmGrid.vue'
 
 const router = useRouter()
 const loading = ref(false)
 const homeData = ref(null)
-const genreMovies = ref({})
-const genreTv = ref({})
+const currentItems = ref([])
+const currentGenre = ref({ key: 'hot', name: '热门推荐', media_type: null, tmdb_id: null })
 
-const movieGenres = computed(() => homeData.value?.genres?.filter(g => g.media_type === 'movie') || [])
-const tvGenres = computed(() => homeData.value?.genres?.filter(g => g.media_type === 'tv') || [])
+// 合并电影类型和剧集类型
+const filteredGenres = computed(() => homeData.value?.genres || [])
+const allGenres = computed(() => homeData.value?.genres || [])
+
+// 热门推荐 = trending_all
+const trendingAll = computed(() => homeData.value?.trending_all || [])
 
 const loadHome = async () => {
-  loading.value = true
   try {
     const { data } = await getHome()
     homeData.value = data
+    // 默认显示热门推荐
+    currentItems.value = trendingAll.value
   } catch {
     ElMessage.error('加载首页数据失败')
+  }
+}
+
+const loadGenreContent = async (genre) => {
+  loading.value = true
+  currentItems.value = []
+  try {
+    if (genre.media_type === 'movie') {
+      const { data } = await getMovies({ genre: genre.tmdb_id, page: 1 })
+      currentItems.value = data.slice(0, 20)
+    } else if (genre.media_type === 'tv') {
+      const { data } = await getTvShows({ genre: genre.tmdb_id, page: 1 })
+      currentItems.value = data.slice(0, 20)
+    } else if (genre.key === 'hot') {
+      currentItems.value = trendingAll.value
+    } else {
+      // 综艺/动漫等未知类型，显示 trending_all 作为兜底
+      currentItems.value = trendingAll.value
+    }
+  } catch {
+    currentItems.value = []
   } finally {
     loading.value = false
   }
 }
 
-const loadGenreMovies = async (genreId) => {
-  if (genreMovies.value[genreId]) return  // 已加载
-  try {
-    const { data } = await getMovies({ genre: genreId, page: 1 })
-    genreMovies.value[genreId] = data.slice(0, 20)
-  } catch {
-    genreMovies.value[genreId] = []
-  }
-}
-
-const loadGenreTv = async (genreId) => {
-  if (genreTv.value[genreId]) return
-  try {
-    const { data } = await getTvShows({ genre: genreId, page: 1 })
-    genreTv.value[genreId] = data.slice(0, 20)
-  } catch {
-    genreTv.value[genreId] = []
-  }
-}
-
-const handleSearch = () => {
-  router.push({ path: '/search', query: { q: keyword.value } })
+const handleGenreSelect = (genre) => {
+  currentGenre.value = genre
+  loadGenreContent(genre)
 }
 
 const handleSelect = (item) => {
   router.push(`/video/${item.media_type}/${item.tmdb_id}`)
 }
 
+const handlePlay = (item) => {
+  router.push(`/video/${item.media_type}/${item.tmdb_id}/play`)
+}
+
+const handleFavorite = async (item) => {
+  try {
+    await addFavorite(item.tmdb_id)
+    ElMessage.success('收藏成功')
+  } catch {
+    ElMessage.error('收藏失败')
+  }
+}
+
+const handleSearch = () => {
+  if (keyword.value.trim()) {
+    router.push({ path: '/search', query: { q: keyword.value.trim() } })
+  }
+}
+
 const keyword = ref('')
 
 onMounted(async () => {
   await loadHome()
-  // 预加载前3个 genre 的内容
-  movieGenres.value.slice(0, 3).forEach(g => loadGenreMovies(g.tmdb_id))
-  tvGenres.value.slice(0, 3).forEach(g => loadGenreTv(g.tmdb_id))
 })
 </script>
 
 <style scoped>
 .home {
   min-height: 100vh;
+  background: #0d0d15;
 }
-.header {
-  padding: 20px;
+
+/* Navigation */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding: 24px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(10,10,15,0.8) 0%, transparent 100%);
+}
+.nav-logo {
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.nav-links {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+}
+.nav-links a {
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.nav-links a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+.nav-links a.active {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+}
+.nav-actions { display: flex; gap: 12px; align-items: center; }
+.nav-search {
+  width: 200px;
+  height: 40px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 0 20px;
+  color: #fff;
+  font-size: 14px;
+}
+.nav-search::placeholder { color: rgba(255,255,255,0.4); }
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Content Section */
+.content-section {
+  background: #0d0d15;
+  display: flex;
+  min-height: 100vh;
+}
+.content-area {
+  flex: 1;
+  padding: 100px 48px 60px;
+  overflow-y: auto;
+}
+.content-header {
   display: flex;
   align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: 32px;
 }
-.content {
-  padding: 0;
+.content-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
-.carousel-section {
-  padding: 20px 20px 0 20px;
+.content-title h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+}
+.genre-tag {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
 }
 </style>
