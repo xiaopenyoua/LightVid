@@ -1,43 +1,49 @@
 <template>
   <div class="home">
-    <!-- Navigation -->
-    <nav class="nav">
-      <div class="nav-logo">轻影</div>
-      <ul class="nav-links">
-        <li><a href="#" class="active">首页</a></li>
-        <li><a href="#">电影</a></li>
-        <li><a href="#">剧集</a></li>
-        <li><a href="#">综艺</a></li>
-        <li><a href="#">动漫</a></li>
-      </ul>
-      <div class="nav-actions">
-        <input type="text" class="nav-search" placeholder="搜索电影、剧集..." @keyup.enter="handleSearch" v-model="keyword" />
-        <button class="nav-btn">👤</button>
-      </div>
-    </nav>
+    <!-- ==================== SECTION 1: HERO ==================== -->
+    <section class="fullpage-section">
+      <!-- Navigation -->
+      <nav class="nav">
+        <div class="nav-logo">轻影</div>
+        <ul class="nav-links">
+          <li><a href="#" class="active">首页</a></li>
+          <li><a href="#">电影</a></li>
+          <li><a href="#">剧集</a></li>
+          <li><a href="#">综艺</a></li>
+          <li><a href="#">动漫</a></li>
+        </ul>
+        <div class="nav-actions">
+          <input type="text" class="nav-search" placeholder="搜索电影、剧集..." @keyup.enter="handleSearch" v-model="keyword" />
+          <button class="nav-btn">👤</button>
+        </div>
+      </nav>
 
-    <!-- Hero Section: Full-Screen Carousel -->
-    <HeroCarousel
-      v-if="homeData?.trending_all?.length"
-      :items="homeData.trending_all"
-      @select="handleSelect"
-      @play="handlePlay"
-      @favorite="handleFavorite"
-    />
+      <!-- Hero Carousel -->
+      <HeroCarousel
+        v-if="homeData?.trending_all?.length"
+        :items="homeData.trending_all"
+        @select="handleSelect"
+        @play="handlePlay"
+        @favorite="handleFavorite"
+      />
+    </section>
 
-    <!-- Content Section: Genre Sidebar + Film Grid -->
-    <section class="content-section">
+    <!-- ==================== SECTION 2: CONTENT ==================== -->
+    <section class="fullpage-section content-section">
+      <!-- Left Sidebar (sticky within this section) -->
       <GenreSidebar
         :genres="filteredGenres"
         @select="handleGenreSelect"
       />
 
+      <!-- Right Content Area (scrollable) -->
       <main class="content-area">
         <div class="content-header">
           <div class="content-title">
             <h2>{{ currentGenre.name }}</h2>
             <span class="genre-tag" v-if="currentGenre.name !== '热门推荐'">按分类浏览</span>
           </div>
+          <a href="#" class="content-more">查看全部 →</a>
         </div>
 
         <div v-if="loading" v-loading="true" style="min-height: 400px;"></div>
@@ -146,12 +152,24 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* ===== Scroll Snap 容器 ===== */
 .home {
   min-height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
   background: #0d0d15;
 }
 
-/* Navigation */
+/* ===== Fullpage Section ===== */
+.fullpage-section {
+  height: 100vh;
+  scroll-snap-align: start;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== Navigation ===== */
 .nav {
   position: fixed;
   top: 0;
@@ -212,22 +230,38 @@ onMounted(async () => {
   font-size: 16px;
 }
 
-/* Content Section */
+/* ===== Content Section ===== */
 .content-section {
-  background: #0d0d15;
   display: flex;
-  min-height: 100vh;
+  background: #0d0d15;
 }
+
+/* GenreSidebar 在 content-section 内是 sticky 的 */
+:deep(.genre-sidebar) {
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  flex-shrink: 0;
+}
+
+/* ===== Content Area (independent scroll) ===== */
 .content-area {
   flex: 1;
-  padding: 100px 48px 60px;
+  height: 100vh;
   overflow-y: auto;
+  padding: 100px 48px 60px;
+  scroll-snap-align: none;
 }
 .content-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 32px;
+  position: sticky;
+  top: 0;
+  background: #0d0d15;
+  padding-bottom: 16px;
+  z-index: 10;
 }
 .content-title {
   display: flex;
@@ -247,4 +281,14 @@ onMounted(async () => {
   font-weight: 500;
   color: #fff;
 }
+.content-more {
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.2s;
+}
+.content-more:hover { color: #fff; }
 </style>
