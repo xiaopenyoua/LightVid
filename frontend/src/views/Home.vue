@@ -233,7 +233,9 @@ onMounted(async () => {
 /* ===== Content Section ===== */
 .content-section {
   display: flex;
+  height: 100vh;
   background: #0d0d15;
+  flex-shrink: 0;
 }
 
 /* GenreSidebar 在 content-section 内是 sticky 的 */
