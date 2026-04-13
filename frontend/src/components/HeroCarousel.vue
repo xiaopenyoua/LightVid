@@ -22,6 +22,7 @@
         <span class="rating">⭐ {{ currentItem.vote_average?.toFixed(1) }}</span>
         <span>{{ currentItem.release_date?.slice(0, 4) }}</span>
         <span>{{ currentItem.media_type === 'movie' ? '电影' : '剧集' }}</span>
+        <span v-if="currentItem.runtime">{{ formatRuntime(currentItem.runtime) }}</span>
       </div>
       <p class="hero-desc">{{ currentItem.overview }}</p>
       <div class="hero-actions">
@@ -74,6 +75,15 @@ const currentIndex = ref(0)
 let timer = null
 
 const currentItem = computed(() => props.items[currentIndex.value])
+
+const formatRuntime = (minutes) => {
+  if (!minutes) return null
+  if (Array.isArray(minutes)) minutes = minutes[0]
+  if (!minutes) return null
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  return h > 0 ? `${h}h ${m}m` : `${m}m`
+}
 
 const handleClick = (item) => emit('select', item)
 const handlePlay = (item) => emit('play', item)
@@ -212,7 +222,7 @@ onUnmounted(() => stopAutoPlay())
 .carousel-dots {
   position: absolute;
   bottom: 50px;
-  left: 80px;
+  right: 60px;
   display: flex;
   flex-direction: column;
   gap: 8px;

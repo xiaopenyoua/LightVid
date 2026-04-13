@@ -1,12 +1,19 @@
 <template>
   <div id="app">
-    <el-menu mode="horizontal" :router="true">
-      <el-menu-item index="/">首页</el-menu-item>
-      <el-menu-item index="/tvbox">TV Box</el-menu-item>
-      <el-menu-item index="/history">继续观看</el-menu-item>
-      <el-menu-item index="/favorites">我的收藏</el-menu-item>
-      <el-menu-item index="/settings">设置</el-menu-item>
-    </el-menu>
+    <nav class="nav">
+      <router-link to="/" class="nav-logo">轻影</router-link>
+      <ul class="nav-links">
+        <li><router-link to="/">首页</router-link></li>
+        <li><a href="#">电影</a></li>
+        <li><a href="#">剧集</a></li>
+        <li><a href="#">综艺</a></li>
+        <li><a href="#">动漫</a></li>
+      </ul>
+      <div class="nav-actions">
+        <input type="text" class="nav-search" placeholder="搜索电影、剧集...">
+        <button class="nav-btn">👤</button>
+      </div>
+    </nav>
     <router-view />
   </div>
 </template>
@@ -15,26 +22,85 @@
 </script>
 
 <style>
+body {
+  margin: 0;
+  background: #0d0d1a;
+}
 #app {
   font-family: 'Helvetica Neue', Arial, sans-serif;
   background: #0d0d1a;
   min-height: 100vh;
   color: #fff;
 }
-body {
-  margin: 0;
-  background: #0d0d1a;
+/* 顶部导航栏 */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  padding: 24px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(180deg, rgba(10,10,15,0.8) 0%, transparent 100%);
 }
-/* 暗色主题覆盖 */
-.el-menu {
-  background: #1a1a2e !important;
-  border-bottom: 1px solid #333;
+.nav-logo {
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
 }
-.el-menu-item {
-  color: #b8c2ce !important;
+.nav-links {
+  display: flex;
+  gap: 8px;
+  list-style: none;
 }
-.el-menu-item:hover, .el-menu-item.is-active {
-  background: #252540 !important;
-  color: #409eff !important;
+.nav-links a {
+  color: rgba(255,255,255,0.65);
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.nav-links a:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.08);
+}
+.nav-links a.active,
+.nav-links a.router-link-active {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+}
+.nav-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.nav-search {
+  width: 200px;
+  height: 40px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 0 20px;
+  color: #fff;
+  font-size: 14px;
+}
+.nav-search::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+.nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
 }
 </style>

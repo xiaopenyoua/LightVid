@@ -1,24 +1,7 @@
 <template>
-  <div class="home">
+  <div id="fullpage" ref="fullpageRef">
     <!-- ==================== SECTION 1: HERO ==================== -->
-    <section class="fullpage-section">
-      <!-- Navigation -->
-      <nav class="nav">
-        <div class="nav-logo">轻影</div>
-        <ul class="nav-links">
-          <li><a href="#" class="active">首页</a></li>
-          <li><a href="#">电影</a></li>
-          <li><a href="#">剧集</a></li>
-          <li><a href="#">综艺</a></li>
-          <li><a href="#">动漫</a></li>
-        </ul>
-        <div class="nav-actions">
-          <input type="text" class="nav-search" placeholder="搜索电影、剧集..." @keyup.enter="handleSearch" v-model="keyword" />
-          <button class="nav-btn">👤</button>
-        </div>
-      </nav>
-
-      <!-- Hero Carousel -->
+    <div class="section hero-section">
       <HeroCarousel
         v-if="homeData?.trending_all?.length"
         :items="homeData.trending_all"
@@ -26,18 +9,16 @@
         @play="handlePlay"
         @favorite="handleFavorite"
       />
-    </section>
+    </div>
 
     <!-- ==================== SECTION 2: CONTENT ==================== -->
-    <section class="fullpage-section content-section">
-      <!-- Left Sidebar (sticky within this section) -->
+    <div class="section content-section">
       <GenreSidebar
         :genres="filteredGenres"
         @select="handleGenreSelect"
       />
 
-      <!-- Right Content Area (scrollable) -->
-      <main class="content-area">
+      <main class="content-area" ref="contentRef">
         <div class="content-header">
           <div class="content-title">
             <h2>{{ currentGenre.name }}</h2>
@@ -56,12 +37,12 @@
         />
         <el-empty v-else description="暂无数据" />
       </main>
-    </section>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getHome, getMovies, getTvShows, addFavorite } from '../api'
@@ -75,18 +56,20 @@ const homeData = ref(null)
 const currentItems = ref([])
 const currentGenre = ref({ key: 'hot', name: '热门推荐', media_type: null, tmdb_id: null })
 
-// 合并电影类型和剧集类型
+const fullpageRef = ref(null)
+const contentRef = ref(null)
+const currentSection = ref(0)
+let isScrolling = false
+let expectedDelta = 0 // 期望的滚动方向（来自 wheel 事件）
+
 const filteredGenres = computed(() => homeData.value?.genres || [])
 const allGenres = computed(() => homeData.value?.genres || [])
-
-// 热门推荐 = trending_all
 const trendingAll = computed(() => homeData.value?.trending_all || [])
 
 const loadHome = async () => {
   try {
     const { data } = await getHome()
     homeData.value = data
-    // 默认显示热门推荐
     currentItems.value = trendingAll.value
   } catch {
     ElMessage.error('加载首页数据失败')
@@ -106,7 +89,6 @@ const loadGenreContent = async (genre) => {
     } else if (genre.key === 'hot') {
       currentItems.value = trendingAll.value
     } else {
-      // 综艺/动漫等未知类型，显示 trending_all 作为兜底
       currentItems.value = trendingAll.value
     }
   } catch {
@@ -138,121 +120,140 @@ const handleFavorite = async (item) => {
   }
 }
 
-const keyword = ref('')
+const goToSection = (index) => {
+  if (isScrolling || index < 0 || index > 1) return
+  if (index === currentSection.value) return
+  isScrolling = true
+  currentSection.value = index
+  const section = fullpageRef.value.children[index]
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  setTimeout(() => {
+    isScrolling = false
+  }, 800)
+}
 
-const handleSearch = () => {
-  if (keyword.value.trim()) {
-    router.push({ path: '/search', query: { q: keyword.value.trim() } })
+const handleWheel = (e) => {
+  if (isScrolling) {
+    e.preventDefault()
+    return
+  }
+
+  const delta = e.deltaY || e.detail || -e.wheelDelta
+  const contentArea = e.target.closest('.content-area')
+  const genreList = e.target.closest('.genre-list')
+
+  // 如果在内容区或侧边栏内部
+  if (contentArea || genreList) {
+    // 记录期望的滚动方向
+    expectedDelta = delta
+    return
+  }
+
+  // 在空白区域滚动
+  if (delta > 30) {
+    goToSection(1)
+  } else if (delta < -30) {
+    goToSection(0)
   }
 }
 
-onMounted(async () => {
-  await loadHome()
+const handleScroll = (e) => {
+  if (isScrolling) return
+
+  const area = e.target
+  if (!area) return
+  const isContentArea = area.closest?.('.content-area')
+  const isGenreSidebar = area.closest?.('.genre-sidebar')
+  if (!isContentArea && !isGenreSidebar) return
+
+  const scrollTop = area.scrollTop
+  const scrollHeight = area.scrollHeight
+  const clientHeight = area.clientHeight
+  const isAtTop = scrollTop <= 1
+  const isAtBottom = scrollTop + clientHeight >= scrollHeight - 2
+
+  // 检测是否在边界处继续滚动
+  if (expectedDelta < -10 && isAtTop && currentSection.value === 1) {
+    goToSection(0)
+    expectedDelta = 0
+    return
+  }
+  if (expectedDelta > 10 && isAtBottom && currentSection.value === 0) {
+    goToSection(1)
+    expectedDelta = 0
+    return
+  }
+
+  // 如果滚动到中间位置，清除期望方向
+  if (!isAtTop && !isAtBottom) {
+    expectedDelta = 0
+  }
+}
+
+const handleKeydown = (e) => {
+  if (isScrolling) return
+  if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+    e.preventDefault()
+    goToSection(1)
+  } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+    e.preventDefault()
+    goToSection(0)
+  }
+}
+
+onMounted(() => {
+  loadHome()
+  window.addEventListener('wheel', handleWheel, { passive: false })
+  window.addEventListener('keydown', handleKeydown)
+  document.querySelectorAll('.content-area, .genre-list').forEach(el => {
+    el.addEventListener('scroll', handleScroll, { passive: true })
+  })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('wheel', handleWheel)
+  window.removeEventListener('keydown', handleKeydown)
+  document.querySelectorAll('.content-area, .genre-list').forEach(el => {
+    el.removeEventListener('scroll', handleScroll)
+  })
 })
 </script>
 
 <style scoped>
-/* ===== Scroll Snap 容器 ===== */
-.home {
-  min-height: 100vh;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
-  scroll-behavior: smooth;
-  background: #0d0d15;
-}
-
-/* ===== Fullpage Section ===== */
-.fullpage-section {
+#fullpage {
   height: 100vh;
-  scroll-snap-align: start;
-  position: relative;
   overflow: hidden;
 }
 
-/* ===== Navigation ===== */
-.nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 200;
-  padding: 24px 48px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: linear-gradient(180deg, rgba(10,10,15,0.8) 0%, transparent 100%);
-}
-.nav-logo {
-  font-size: 26px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #6366f1, #a855f7);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-.nav-links {
-  display: flex;
-  gap: 8px;
-  list-style: none;
-}
-.nav-links a {
-  color: rgba(255,255,255,0.65);
-  text-decoration: none;
-  padding: 10px 20px;
-  border-radius: 24px;
-  font-size: 14px;
-  transition: all 0.2s;
-}
-.nav-links a:hover { color: #fff; background: rgba(255,255,255,0.08); }
-.nav-links a.active {
-  color: #fff;
-  background: rgba(255,255,255,0.12);
-}
-.nav-actions { display: flex; gap: 12px; align-items: center; }
-.nav-search {
-  width: 200px;
-  height: 40px;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 20px;
-  padding: 0 20px;
-  color: #fff;
-  font-size: 14px;
-}
-.nav-search::placeholder { color: rgba(255,255,255,0.4); }
-.nav-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-size: 16px;
+.section {
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* ===== Content Section ===== */
+.hero-section {
+  background: #0d0d15;
+}
+
 .content-section {
   display: flex;
   height: 100vh;
   background: #0d0d15;
-  flex-shrink: 0;
 }
 
-/* GenreSidebar 在 content-section 内是 sticky 的 */
 :deep(.genre-sidebar) {
   height: 100vh;
-  position: sticky;
-  top: 0;
-  flex-shrink: 0;
+  overflow-y: auto;
 }
 
-/* ===== Content Area (independent scroll) ===== */
 .content-area {
   flex: 1;
-  height: 100vh;
   overflow-y: auto;
   padding: 100px 48px 60px;
-  scroll-snap-align: none;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.content-area::-webkit-scrollbar {
+  display: none;
 }
 .content-header {
   display: flex;

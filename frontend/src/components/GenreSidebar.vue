@@ -103,10 +103,12 @@ const getGenreIcon = (name) => ICON_MAP[name] || '🎬'
 .genre-list {
   flex: 1;
   overflow-y: auto;
-  padding: 0 16px;
+  padding: 0 16px 120px;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-.genre-list::-webkit-scrollbar { width: 4px; }
-.genre-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+.genre-list::-webkit-scrollbar { display: none; }
 .genre-item {
   display: flex;
   align-items: center;
