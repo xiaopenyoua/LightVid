@@ -2,13 +2,6 @@
   <div id="app">
     <nav class="nav">
       <router-link to="/" class="nav-logo">轻影</router-link>
-      <ul class="nav-links">
-        <li><router-link to="/">首页</router-link></li>
-        <li><a href="#">电影</a></li>
-        <li><a href="#">剧集</a></li>
-        <li><a href="#">综艺</a></li>
-        <li><a href="#">动漫</a></li>
-      </ul>
       <div class="nav-actions">
         <input type="text" class="nav-search" placeholder="搜索电影、剧集...">
         <button class="nav-btn">👤</button>

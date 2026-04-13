@@ -17,33 +17,12 @@
           <div class="genre-name">{{ nav.name }}</div>
         </div>
       </div>
-
-      <!-- 真实类型列表 -->
-      <div
-        v-for="genre in genres"
-        :key="genre.tmdb_id"
-        class="genre-item"
-        :class="{ active: activeKey === `genre-${genre.tmdb_id}` }"
-        @click="handleGenreClick(genre)"
-      >
-        <div class="genre-icon">{{ getGenreIcon(genre.name) }}</div>
-        <div class="genre-info">
-          <div class="genre-name">{{ genre.name }}</div>
-        </div>
-      </div>
     </div>
   </aside>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-
-const props = defineProps({
-  genres: {
-    type: Array,
-    default: () => []  // [{ tmdb_id, name, media_type }]
-  }
-})
 
 const emit = defineEmits(['select'])  // select(genre { tmdb_id, name, media_type })
 
@@ -61,20 +40,6 @@ const handleNavClick = (nav) => {
   activeKey.value = nav.key
   emit('select', { key: nav.key, name: nav.name, media_type: nav.media_type, tmdb_id: null })
 }
-
-const handleGenreClick = (genre) => {
-  activeKey.value = `genre-${genre.tmdb_id}`
-  emit('select', { key: `genre-${genre.tmdb_id}`, name: genre.name, media_type: genre.media_type, tmdb_id: genre.tmdb_id })
-}
-
-const ICON_MAP = {
-  '科幻': '🚀', '爱情': '💕', '动作': '🔫', '奇幻': '🗡️',
-  '恐怖': '👻', '喜剧': '😂', '剧情': '📜', '悬疑': '🔎',
-  '冒险': '🌍', '动画': '🎨', '纪录片': '📽️', '音乐': '🎵',
-  '战争': '⚔️', '犯罪': '🚔', '历史': '🏛️', '家庭': '👨‍👩‍👧',
-}
-
-const getGenreIcon = (name) => ICON_MAP[name] || '🎬'
 </script>
 
 <style scoped>

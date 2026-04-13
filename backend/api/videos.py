@@ -25,13 +25,22 @@ async def get_home(db: Session = Depends(get_db)):
     首页全量数据：
     - 所有类型列表
     - 7个缓存的列表（trending/popular/top_rated/upcoming × movie/tv）
+    - popular_all: 热门电影+剧集混合数据（第二页热门推荐用）
     """
     # 获取所有 Genre
     genres = db.query(TmdbGenre).all()
 
     # 获取 trending/all/day 用于首页轮播（实时，不走缓存保证新鲜度）
-    trending_all_raw = await tmdb_service.get_trending(media_type="all", time_window="day")
+    trending_all_raw = await tmdb_service.get_trending(media_type="all", time_window="week")
     trending_all = [tmdb_service.format_tmdb_item(r) for r in trending_all_raw[:10]]
+
+    # 获取 popular/all 用于第二页热门推荐（实时调用 TMDB API）
+    popular_movies_raw = await tmdb_service.get_popular_movies()
+    popular_tv_raw = await tmdb_service.get_popular_tv()
+    popular_all = (
+        [tmdb_service.format_tmdb_item(r, media_type="movie") for r in popular_movies_raw[:20]] +
+        [tmdb_service.format_tmdb_item(r, media_type="tv") for r in popular_tv_raw[:20]]
+    )
 
     # 获取所有缓存列表
     lists = {}
@@ -47,6 +56,7 @@ async def get_home(db: Session = Depends(get_db)):
         "genres": [TmdbGenreResponse.model_validate(g) for g in genres],
         "lists": {k: [TmdbCachedItemResponse.model_validate(i) for i in v] for k, v in lists.items()},
         "trending_all": [TmdbCachedItemResponse.model_validate(t) for t in trending_all],
+        "popular_all": [TmdbCachedItemResponse.model_validate(t) for t in popular_all],
     }
 
 
@@ -63,32 +73,54 @@ def get_genres(db: Session = Depends(get_db)):
 
 @router.get("/movies")
 async def get_movies(
-    genre: int = None,
     page: int = Query(default=1, ge=1),
     sort_by: str = "popularity.desc",
+    year: int = None,
+    genre: int = None,
+    genres: str = None,
+    language: str = None,
+    vote_count_gte: int = None,
 ):
     """
     获取电影列表（实时调 TMDB discover）
-    - genre: 可选，TMDB genre ID
+    - genre: 单个 TMDB genre ID（兼容旧参数）
+    - genres: 多个 genre ID，逗号分隔（如 "16,35"）
     - sort_by: popularity.desc / vote_average.desc / release_date.desc
+    - year: 发行年份
+    - language: 原始语言（如 zh, en, ja）
+    - vote_count_gte: 最少投票数
     """
     results = await tmdb_service.discover_movies(
-        genre_id=genre, page=page, sort_by=sort_by
+        page=page,
+        sort_by=sort_by,
+        year=year,
+        genre_ids=genre or genres,
+        language=language,
+        vote_count_gte=vote_count_gte,
     )
     return [tmdb_service.format_tmdb_item(r, "movie") for r in results]
 
 
 @router.get("/tv")
 async def get_tv_shows(
-    genre: int = None,
     page: int = Query(default=1, ge=1),
     sort_by: str = "popularity.desc",
+    year: int = None,
+    genre: int = None,
+    genres: str = None,
+    language: str = None,
+    vote_count_gte: int = None,
 ):
     """
     获取剧集列表（实时调 TMDB discover）
     """
     results = await tmdb_service.discover_tv(
-        genre_id=genre, page=page, sort_by=sort_by
+        page=page,
+        sort_by=sort_by,
+        year=year,
+        genre_ids=genre or genres,
+        language=language,
+        vote_count_gte=vote_count_gte,
     )
     return [tmdb_service.format_tmdb_item(r, "tv") for r in results]
 

@@ -263,16 +263,33 @@ class TMDBService:
             return []
 
     async def discover_movies(
-        self, genre_id: int = None, page: int = 1, sort_by: str = "popularity.desc"
+        self,
+        page: int = 1,
+        sort_by: str = "popularity.desc",
+        year: int = None,
+        genre_ids: str = None,
+        language: str = None,
+        vote_count_gte: int = None,
     ) -> list[dict]:
-        """按类型发现电影"""
+        """按类型发现电影，支持多种筛选条件"""
         if not self.api_key:
             print("[TMDB] API key 未配置")
             return []
         url = f"{self.base_url}/discover/movie"
-        params = {"api_key": self.api_key, "language": LANGUAGE, "page": page, "sort_by": sort_by}
-        if genre_id:
-            params["with_genres"] = genre_id
+        params = {
+            "api_key": self.api_key,
+            "language": LANGUAGE,
+            "page": page,
+            "sort_by": sort_by,
+        }
+        if genre_ids:
+            params["with_genres"] = genre_ids
+        if year:
+            params["primary_release_year"] = year
+        if language:
+            params["with_original_language"] = language
+        if vote_count_gte:
+            params["vote_count.gte"] = vote_count_gte
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
                 resp = await client.get(url, params=params)
@@ -283,16 +300,33 @@ class TMDBService:
             return []
 
     async def discover_tv(
-        self, genre_id: int = None, page: int = 1, sort_by: str = "popularity.desc"
+        self,
+        page: int = 1,
+        sort_by: str = "popularity.desc",
+        year: int = None,
+        genre_ids: str = None,
+        language: str = None,
+        vote_count_gte: int = None,
     ) -> list[dict]:
-        """按类型发现剧集"""
+        """按类型发现剧集，支持多种筛选条件"""
         if not self.api_key:
             print("[TMDB] API key 未配置")
             return []
         url = f"{self.base_url}/discover/tv"
-        params = {"api_key": self.api_key, "language": LANGUAGE, "page": page, "sort_by": sort_by}
-        if genre_id:
-            params["with_genres"] = genre_id
+        params = {
+            "api_key": self.api_key,
+            "language": LANGUAGE,
+            "page": page,
+            "sort_by": sort_by,
+        }
+        if genre_ids:
+            params["with_genres"] = genre_ids
+        if year:
+            params["first_air_date_year"] = year
+        if language:
+            params["with_original_language"] = language
+        if vote_count_gte:
+            params["vote_count.gte"] = vote_count_gte
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
                 resp = await client.get(url, params=params)

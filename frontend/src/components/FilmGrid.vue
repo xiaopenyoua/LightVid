@@ -14,7 +14,7 @@
           </div>
           <div class="film-info">
             <div class="rating">⭐ {{ item.vote_average?.toFixed(1) }}</div>
-            <div class="tags" v-if="item.genre_ids">
+            <div class="tags" v-if="genres.length && item.genre_ids">
               <span class="tag" v-for="gid in getGenreIds(item)" :key="gid">
                 {{ genreName(gid) }}
               </span>

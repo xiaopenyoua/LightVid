@@ -14,11 +14,10 @@
     <!-- ==================== SECTION 2: CONTENT ==================== -->
     <div class="section content-section">
       <GenreSidebar
-        :genres="filteredGenres"
         @select="handleGenreSelect"
       />
 
-      <main class="content-area" ref="contentRef">
+      <main class="content-area">
         <div class="content-header">
           <div class="content-title">
             <h2>{{ currentGenre.name }}</h2>
@@ -27,11 +26,62 @@
           <a href="#" class="content-more">查看全部 →</a>
         </div>
 
+        <!-- 筛选条件 -->
+        <div class="filter-bar" v-if="showFilter">
+          <div class="filter-group">
+            <span class="filter-label">排序</span>
+            <div class="filter-chips">
+              <span
+                v-for="item in sortOptions"
+                :key="item.value"
+                class="chip"
+                :class="{ active: filters.sort_by === item.value }"
+                @click="selectFilter('sort_by', item.value)"
+              >{{ item.label }}</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">类型</span>
+            <div class="filter-chips">
+              <span
+                v-for="item in genreOptions"
+                :key="item.value"
+                class="chip"
+                :class="{ active: filters.genre === item.value }"
+                @click="selectFilter('genre', item.value)"
+              >{{ item.label }}</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">语言</span>
+            <div class="filter-chips">
+              <span
+                v-for="item in languageOptions"
+                :key="item.value"
+                class="chip"
+                :class="{ active: filters.language === item.value }"
+                @click="selectFilter('language', item.value)"
+              >{{ item.label }}</span>
+            </div>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">年份</span>
+            <div class="filter-chips">
+              <span
+                v-for="item in yearOptions"
+                :key="item.value"
+                class="chip"
+                :class="{ active: filters.year === item.value }"
+                @click="selectFilter('year', item.value)"
+              >{{ item.label }}</span>
+            </div>
+          </div>
+        </div>
+
         <div v-if="loading" v-loading="true" style="min-height: 400px;"></div>
         <FilmGrid
           v-else-if="currentItems.length"
           :items="currentItems"
-          :genres="allGenres"
           @select="handleSelect"
           @play="handlePlay"
         />
@@ -45,7 +95,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getHome, getMovies, getTvShows, addFavorite } from '../api'
+import { getHome, getMovies, getTvShows, getGenres, addFavorite } from '../api'
 import HeroCarousel from '../components/HeroCarousel.vue'
 import GenreSidebar from '../components/GenreSidebar.vue'
 import FilmGrid from '../components/FilmGrid.vue'
@@ -53,24 +103,76 @@ import FilmGrid from '../components/FilmGrid.vue'
 const router = useRouter()
 const loading = ref(false)
 const homeData = ref(null)
+const genreData = ref({ movie: [], tv: [] })
 const currentItems = ref([])
 const currentGenre = ref({ key: 'hot', name: '热门推荐', media_type: null, tmdb_id: null })
+const filters = ref({
+  sort_by: 'popularity.desc',
+  genre: '',
+  language: '',
+  year: '',
+})
+
+// 排序选项
+const sortOptions = [
+  { label: '热门', value: 'popularity.desc' },
+  { label: '评分', value: 'vote_average.desc' },
+  { label: '最新', value: 'release_date.desc' },
+]
+
+// 语言选项
+const languageOptions = [
+  { label: '全部', value: '' },
+  { label: '中文', value: 'zh' },
+  { label: '英语', value: 'en' },
+  { label: '日语', value: 'ja' },
+  { label: '韩语', value: 'ko' },
+]
+
+// 年份选项（动态生成）
+const yearOptions = computed(() => {
+  const currentYear = new Date().getFullYear()
+  const years = [{ label: '全部', value: '' }]
+  for (let y = currentYear; y >= currentYear - 10; y--) {
+    years.push({ label: String(y), value: String(y) })
+  }
+  years.push({ label: '更早', value: 'before' })
+  return years
+})
 
 const fullpageRef = ref(null)
-const contentRef = ref(null)
 const currentSection = ref(0)
 let isScrolling = false
-let expectedDelta = 0 // 期望的滚动方向（来自 wheel 事件）
+let expectedDelta = 0
 
-const filteredGenres = computed(() => homeData.value?.genres || [])
-const allGenres = computed(() => homeData.value?.genres || [])
-const trendingAll = computed(() => homeData.value?.trending_all || [])
+const showFilter = computed(() => {
+  return ['movie', 'tv', 'variety', 'anime'].includes(currentGenre.value.key)
+})
+
+// 根据当前选中分类动态获取类型选项
+const genreOptions = computed(() => {
+  // 综艺不需要类型筛选
+  if (currentGenre.value.key === 'variety') {
+    return [{ label: '全部', value: '' }]
+  }
+  // 动漫使用电影类型，但默认选中动画
+  const genres = genreData.value.movie
+  return [{ label: '全部', value: '' }, ...genres.map(g => ({ label: g.name, value: String(g.tmdb_id) }))]
+})
+
+const popularAll = computed(() => homeData.value?.popular_all || [])
 
 const loadHome = async () => {
   try {
-    const { data } = await getHome()
-    homeData.value = data
-    currentItems.value = trendingAll.value
+    const [homeRes, genresRes] = await Promise.all([getHome(), getGenres()])
+    homeData.value = homeRes.data
+    // 按 media_type 分离 genres
+    const allGenres = genresRes.data
+    genreData.value = {
+      movie: allGenres.filter(g => g.media_type === 'movie'),
+      tv: allGenres.filter(g => g.media_type === 'tv'),
+    }
+    currentItems.value = popularAll.value
   } catch {
     ElMessage.error('加载首页数据失败')
   }
@@ -80,16 +182,72 @@ const loadGenreContent = async (genre) => {
   loading.value = true
   currentItems.value = []
   try {
-    if (genre.media_type === 'movie') {
-      const { data } = await getMovies({ genre: genre.tmdb_id, page: 1 })
+    if (genre.key === 'hot') {
+      currentItems.value = popularAll.value
+    }
+    // 电影
+    else if (genre.key === 'movie') {
+      const params = { page: 1, sort_by: filters.value.sort_by }
+      if (filters.value.genre) params.genres = filters.value.genre
+      if (filters.value.language) params.language = filters.value.language
+      if (filters.value.year) {
+        if (filters.value.year === 'before') {
+          params.year = 2018
+        } else {
+          params.year = Number(filters.value.year)
+        }
+      }
+      const { data } = await getMovies(params)
       currentItems.value = data.slice(0, 20)
-    } else if (genre.media_type === 'tv') {
-      const { data } = await getTvShows({ genre: genre.tmdb_id, page: 1 })
+    }
+    // 剧集
+    else if (genre.key === 'tv') {
+      const params = { page: 1, sort_by: filters.value.sort_by }
+      if (filters.value.genre) params.genres = filters.value.genre
+      if (filters.value.language) params.language = filters.value.language
+      if (filters.value.year) {
+        if (filters.value.year === 'before') {
+          params.year = 2018
+        } else {
+          params.year = Number(filters.value.year)
+        }
+      }
+      const { data } = await getTvShows(params)
       currentItems.value = data.slice(0, 20)
-    } else if (genre.key === 'hot') {
-      currentItems.value = trendingAll.value
-    } else {
-      currentItems.value = trendingAll.value
+    }
+    // 综艺：使用 TV discover，genre 10764(Reality)+10767(Talk)+10766(Soap)
+    else if (genre.key === 'variety') {
+      const params = { page: 1, sort_by: filters.value.sort_by }
+      params.genres = '10764,10767,10766'
+      if (filters.value.language) params.language = filters.value.language
+      if (filters.value.year) {
+        if (filters.value.year === 'before') {
+          params.year = 2018
+        } else {
+          params.year = Number(filters.value.year)
+        }
+      }
+      const { data } = await getTvShows(params)
+      currentItems.value = data.slice(0, 20)
+    }
+    // 动漫：默认使用 genre 16 (Animation)，但允许用户选择其他类型
+    else if (genre.key === 'anime') {
+      const params = { page: 1, sort_by: filters.value.sort_by }
+      // 用户选择的类型，或者默认 Animation
+      params.genres = filters.value.genre || '16'
+      if (filters.value.language) params.language = filters.value.language
+      if (filters.value.year) {
+        if (filters.value.year === 'before') {
+          params.year = 2018
+        } else {
+          params.year = Number(filters.value.year)
+        }
+      }
+      const { data } = await getMovies(params)
+      currentItems.value = data.slice(0, 20)
+    }
+    else {
+      currentItems.value = popularAll.value
     }
   } catch {
     currentItems.value = []
@@ -100,7 +258,18 @@ const loadGenreContent = async (genre) => {
 
 const handleGenreSelect = (genre) => {
   currentGenre.value = genre
+  filters.value = {
+    sort_by: 'popularity.desc',
+    genre: '',
+    language: '',
+    year: '',
+  }
   loadGenreContent(genre)
+}
+
+const selectFilter = (key, value) => {
+  filters.value[key] = value
+  loadGenreContent(currentGenre.value)
 }
 
 const handleSelect = (item) => {
@@ -294,4 +463,45 @@ onUnmounted(() => {
   transition: color 0.2s;
 }
 .content-more:hover { color: #fff; }
+.filter-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.filter-label {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  min-width: 40px;
+}
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chip {
+  padding: 6px 14px;
+  border-radius: 16px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+.chip:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+.chip.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+}
 </style>
