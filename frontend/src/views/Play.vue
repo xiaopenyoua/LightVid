@@ -37,7 +37,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute } from 'vue-router'
-import { getVideo, getPlaySources, getParseConfigs, updateHistory } from '../api'
+import { getVideoDetail, getPlaySources, getParseConfigs, updateHistory } from '../api'
 
 const route = useRoute()
 const video = ref(null)
@@ -47,10 +47,12 @@ const selectedParseConfig = ref(null)
 const currentUrl = ref('')
 
 const loadData = async () => {
-  const doubanId = route.params.id
-  video.value = await getVideo(doubanId)
-  const { data } = await getPlaySources()
-  sources.value = data
+  const mediaType = route.params.media_type
+  const tmdbId = route.params.id
+  const { data } = await getVideoDetail(mediaType, tmdbId)
+  video.value = data
+  const { data: sourcesData } = await getPlaySources()
+  sources.value = sourcesData
   const { data: configs } = await getParseConfigs()
   parseConfigs.value = configs
 }

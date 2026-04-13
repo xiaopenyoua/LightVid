@@ -6,7 +6,6 @@
         :key="item.tmdb_id"
         class="hero-slide"
         :class="{ active: currentIndex === index }"
-        @click="handleClick(item)"
       >
         <img :src="item.backdrop_url" class="hero-bg" :alt="item.title" />
         <div class="hero-gradient"></div>
@@ -26,7 +25,7 @@
       </div>
       <p class="hero-desc">{{ currentItem.overview }}</p>
       <div class="hero-actions">
-        <button class="btn-primary" @click.stop="handlePlay(currentItem)">
+        <button class="btn-primary" @click="handlePlay(currentItem)">
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           立即播放
         </button>
