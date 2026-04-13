@@ -1,7 +1,8 @@
 <template>
   <div class="history-page">
     <h2>继续观看</h2>
-    <div v-loading="loading" class="history-list">
+    <div class="history-list">
+      <LoadingSpinner v-if="loading" :size="50" class="loading-center" />
       <div v-for="item in history" :key="item.id" class="history-item" @click="handleResume(item)">
         <img :src="item.video?.poster_url" class="poster" />
         <div class="info">
@@ -22,6 +23,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getHistory, deleteHistory } from '../api'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
 
 const router = useRouter()
 const history = ref([])
@@ -75,4 +77,5 @@ onMounted(loadHistory)
 .progress-bar { height: 4px; background: #333; border-radius: 2px; margin-bottom: 4px; }
 .progress-fill { height: 100%; background: #409eff; border-radius: 2px; }
 .progress-text { font-size: 12px; color: #888; }
+.loading-center { display: flex; justify-content: center; padding: 40px 0; }
 </style>

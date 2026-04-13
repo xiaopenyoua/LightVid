@@ -4,7 +4,8 @@
       <h1>搜索</h1>
       <el-input v-model="keyword" placeholder="输入关键词搜索..." style="width: 400px" @keyup.enter="doSearch" />
     </div>
-    <div v-loading="loading" class="search-results">
+    <div class="search-results">
+      <LoadingSpinner v-if="loading" :size="50" />
       <div v-if="results.length" class="results-grid">
         <div v-for="item in results" :key="`${item.tmdb_id}-${item.season_number || 0}`" class="result-item" @click="goDetail(item)">
           <img :src="item.poster_url" />
@@ -23,6 +24,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { searchVideos } from '../api'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -95,4 +97,6 @@ onMounted(() => {
   font-size: 12px;
   color: #999;
 }
+:deep(.search-results) { min-height: 300px; position: relative; }
+.loading-center { display: flex; justify-content: center; padding: 40px 0; }
 </style>

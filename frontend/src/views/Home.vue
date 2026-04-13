@@ -78,7 +78,9 @@
           </div>
         </div>
 
-        <div v-if="loading" v-loading="true" style="min-height: 400px;"></div>
+        <div v-if="loading" class="loading-wrapper">
+          <LoadingSpinner :size="60" />
+        </div>
         <FilmGrid
           v-else-if="currentItems.length"
           :items="currentItems"
@@ -99,6 +101,7 @@ import { getHome, getMovies, getTvShows, getGenres, addFavorite } from '../api'
 import HeroCarousel from '../components/HeroCarousel.vue'
 import GenreSidebar from '../components/GenreSidebar.vue'
 import FilmGrid from '../components/FilmGrid.vue'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
 
 const router = useRouter()
 const loading = ref(false)
@@ -503,5 +506,12 @@ onUnmounted(() => {
 .chip.active {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
+}
+.loading-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  width: 100%;
 }
 </style>

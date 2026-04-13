@@ -1,7 +1,8 @@
 <template>
   <div class="favorites-page">
     <h2>我的收藏</h2>
-    <div v-loading="loading" class="favorites-list">
+    <div class="favorites-list">
+      <LoadingSpinner v-if="loading" :size="50" class="loading-center" />
       <PosterWall :videos="videos" @select="handleSelect" />
       <el-empty v-if="!loading && videos.length === 0" description="暂无收藏" />
     </div>
@@ -14,6 +15,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getFavorites } from '../api'
 import PosterWall from '../components/PosterWall.vue'
+import LoadingSpinner from '../components/LoadingSpinner.vue'
 
 const router = useRouter()
 const videos = ref([])
@@ -41,4 +43,5 @@ onMounted(loadFavorites)
 <style scoped>
 .favorites-page { padding: 20px; }
 .favorites-list { min-height: 200px; }
+.loading-center { display: flex; justify-content: center; padding: 40px 0; }
 </style>
