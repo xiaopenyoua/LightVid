@@ -132,13 +132,13 @@ const handleFavorite = async (item) => {
   }
 }
 
+const keyword = ref('')
+
 const handleSearch = () => {
   if (keyword.value.trim()) {
     router.push({ path: '/search', query: { q: keyword.value.trim() } })
   }
 }
-
-const keyword = ref('')
 
 onMounted(async () => {
   await loadHome()
