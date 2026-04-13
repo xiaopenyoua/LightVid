@@ -5,7 +5,7 @@
 **Goal:** 将首页改造为「全屏轮播 + 左侧分类导航 + 右侧影片网格」布局
 
 **Architecture:**
-- 后端：修改 3 个 schema 文件暴露已有字段，新增 1 个 home 接口字段
+- 后端：只需修改 `/home` 接口，新增 `trending_all` 字段（schema 已有字段，无需修改）
 - 前端：新建 3 个组件，重写 Home.vue
 - 数据流：轮播用 `trending/all/day`（实时），分类用现有 `TmdbGenre`，影片网格用现有 `getMovies`/`getTvShows` API
 
@@ -27,9 +27,6 @@
 
 ```
 backend/
-├── schemas/
-│   ├── tmdb_genre.py          # 修改: 新增 media_type 字段
-│   └── tmdb_cached_list.py    # 修改: 新增 backdrop_url 字段
 └── api/
     └── videos.py              # 修改: /home 新增 trending_all
 
@@ -42,52 +39,15 @@ frontend/src/
     └── FilmGrid.vue           # 新建: 影片网格
 ```
 
+> 注意：Task 1（Schema 改动）已验证无需修改，字段已存在。
+
 ---
 
-## Task 1: 后端 Schema 改动
+## Task 1: 后端 Schema 改动（已实现，跳过）
 
-**Files:**
-- Modify: `backend/schemas/tmdb_genre.py`
-- Modify: `backend/schemas/tmdb_cached_list.py`
+**状态：经核实，`TmdbGenreResponse` 已有 `media_type` 字段，`TmdbCachedItemResponse` 已有 `backdrop_url` 字段，无需任何改动。**
 
-- [ ] **Step 1: 修改 `TmdbGenreResponse` 新增 media_type 字段**
-
-文件 `backend/schemas/tmdb_genre.py`，找到 `TmdbGenreResponse` 类，在 `name` 字段后新增：
-
-```python
-class TmdbGenreResponse(BaseModel):
-    id: int
-    tmdb_id: int
-    name: str
-    media_type: str  # 新增: "movie" 或 "tv"
-```
-
-- [ ] **Step 2: 修改 `TmdbCachedItemResponse` 新增 backdrop_url 字段**
-
-文件 `backend/schemas/tmdb_cached_list.py`，在现有字段列表中新增：
-
-```python
-class TmdbCachedItemResponse(BaseModel):
-    tmdb_id: int
-    title: str
-    media_type: str
-    poster_url: Optional[str]
-    backdrop_url: Optional[str]  # 新增
-    vote_average: Optional[float]
-    vote_count: Optional[int]
-    popularity: Optional[float]
-    overview: Optional[str]
-    release_date: Optional[str]
-    genre_ids: Optional[str]
-    season_number: Optional[int]
-```
-
-- [ ] **Step 3: 提交**
-
-```bash
-git add backend/schemas/
-git commit -m "feat(backend): expose media_type and backdrop_url in schemas"
-```
+此 Task 跳过，无需执行。
 
 ---
 
@@ -96,11 +56,13 @@ git commit -m "feat(backend): expose media_type and backdrop_url in schemas"
 **Files:**
 - Modify: `backend/api/videos.py:22-45`
 
-- [ ] **Step 1: 修改 `get_home` 函数，新增 trending_all**
+- [ ] **Step 1: 修改 `get_home` 函数为 async，新增 trending_all**
 
-在 `backend/api/videos.py` 的 `get_home` 函数中，在返回字典的 `lists` 后面新增 `trending_all` 字段。
+当前 `backend/api/videos.py` 中 `get_home` 是同步函数（第23行 `def get_home`），但 `tmdb_service.get_trending()` 是 async 方法。必须将函数改为 `async def` 才能使用 `await`。
 
-在函数开头（获取 genres 之后）添加：
+找到 `def get_home(db: Session = Depends(get_db)):`，改为 `async def get_home(db: Session = Depends(get_db)):`。
+
+在函数内（获取 genres 之后）添加：
 
 ```python
 # 获取 trending/all/day 用于首页轮播（实时，不走缓存保证新鲜度）
@@ -108,7 +70,7 @@ trending_all_raw = await tmdb_service.get_trending(media_type="all", time_window
 trending_all = [tmdb_service.format_tmdb_item(r) for r in trending_all_raw[:10]]
 ```
 
-在返回字典中新增：
+在返回字典中新增 `trending_all` 字段：
 
 ```python
 return {
@@ -471,7 +433,7 @@ git commit -m "feat(frontend): add HeroCarousel component for full-screen backdr
         v-for="genre in genres"
         :key="genre.tmdb_id"
         class="genre-item"
-        :class="{ active: activeKey === genre.key }"
+        :class="{ active: activeKey === `genre-${genre.tmdb_id}` }"
         @click="handleGenreClick(genre)"
       >
         <div class="genre-icon">{{ getGenreIcon(genre.name) }}</div>
@@ -495,10 +457,12 @@ const props = defineProps({
 
 const emit = defineEmits(['select'])  // select(genre { tmdb_id, name, media_type })
 
-const FIXED_NAV = [
+const fixedNav = [
   { key: 'hot', name: '热门推荐', icon: '🔥', media_type: null },
   { key: 'movie', name: '电影', icon: '🎬', media_type: 'movie' },
   { key: 'tv', name: '剧集', icon: '📺', media_type: 'tv' },
+  { key: 'variety', name: '综艺', icon: '🎭', media_type: null },
+  { key: 'anime', name: '动漫', icon: '🦸', media_type: null },
 ]
 
 const activeKey = ref('hot')
@@ -872,7 +836,7 @@ git commit -m "feat(frontend): add FilmGrid component with hover overlay and rat
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getHome, getMovies, getTvShows, addFavorite } from '../api'
