@@ -11,6 +11,7 @@ from api.parse_configs import router as parse_configs_router
 from api.play import router as play_router
 from api.history import router as history_router
 from api.favorites import router as favorites_router
+from api.search import router as search_router
 from models import ParseConfig
 
 # 创建所有表
@@ -34,6 +35,7 @@ app.include_router(parse_configs_router)
 app.include_router(play_router)
 app.include_router(history_router)
 app.include_router(favorites_router)
+app.include_router(search_router)
 
 scheduler = AsyncIOScheduler()
 
