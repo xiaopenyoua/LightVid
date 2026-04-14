@@ -8,14 +8,12 @@
         <div class="bg-overlay"></div>
       </div>
 
-      <!-- 播放器头部 -->
-      <div class="player-header">
-        <button class="back-btn" @click="$router.back()">←</button>
-        <span class="video-title">{{ video?.title || '加载中...' }}</span>
-      </div>
+      <!-- 返回按钮 -->
+      <button class="back-btn" @click="$router.back()">←</button>
+      <span class="header-title">{{ video?.title || '加载中...' }}</span>
 
       <!-- 播放器主体 -->
-      <div class="player-main" @mousemove="showControls" @mouseleave="hideControls">
+      <div class="player-main">
         <iframe
           v-if="currentUrl"
           :src="currentUrl"
@@ -24,27 +22,9 @@
           allowfullscreen
         ></iframe>
         <div v-else class="player-placeholder">
-          <span class="placeholder-icon">▶</span>
-        </div>
-
-        <!-- 底部控制栏 -->
-        <div class="player-controls" :class="{ visible: controlsVisible }">
-          <div class="progress-bar" @click.stop="seekVideo">
-            <div class="progress-track">
-              <div class="progress-fill" :style="{ width: progress + '%' }"></div>
-            </div>
-          </div>
-          <div class="controls-row">
-            <div class="controls-left">
-              <button class="ctrl-btn">◀◀</button>
-              <button class="ctrl-btn play-btn">{{ isPlaying ? '⏸' : '▶' }}</button>
-              <button class="ctrl-btn">▶▶</button>
-              <span class="time-display">{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
-            </div>
-            <div class="controls-right">
-              <button class="ctrl-btn">🔊</button>
-              <button class="ctrl-btn">⛶</button>
-            </div>
+          <div class="placeholder-content">
+            <span class="placeholder-icon">▶</span>
+            <p>请在右侧选择视频源并输入链接</p>
           </div>
         </div>
       </div>
@@ -60,28 +40,51 @@
           <span v-if="video.release_date">{{ video.release_date.slice(0, 4) }}</span>
           <span v-if="video.runtime">{{ formatRuntime(video.runtime) }}</span>
         </div>
-        <p class="info-overview" v-if="video.overview">{{ video.overview }}</p>
       </div>
 
-      <!-- 播放源 -->
+      <!-- 播放源选择 -->
       <div class="sources-section">
-        <h3 class="section-title">播放源</h3>
-        <div class="source-list">
-          <div
-            v-for="source in sources"
-            :key="source.id"
-            class="source-item"
-            :class="{ active: currentSource?.id === source.id }"
-            @click="playSource(source)"
+        <h3 class="section-title">视频源</h3>
+        <div class="source-grid">
+          <button
+            v-for="source in videoSources"
+            :key="source.value"
+            class="source-btn"
+            :class="{ active: selectedSource === source.value }"
+            @click="selectedSource = source.value"
           >
-            <div class="source-info">
-              <span class="source-name">{{ source.name }}</span>
-              <span class="source-speed" v-if="source.speed">{{ source.speed }}s</span>
-              <span class="source-speed untested" v-else>未测速</span>
-            </div>
-            <span v-if="currentSource?.id === source.id" class="active-indicator">●</span>
-          </div>
+            {{ source.label }}
+          </button>
         </div>
+      </div>
+
+      <!-- 视频解析服务 -->
+      <div class="parser-section">
+        <h3 class="section-title">视频解析服务</h3>
+        <select v-model="selectedParser" class="parser-select">
+          <option v-for="parser in parserServices" :key="parser.value" :value="parser.value">
+            {{ parser.label }}
+          </option>
+        </select>
+      </div>
+
+      <!-- 视频链接输入 -->
+      <div class="url-section">
+        <h3 class="section-title">视频链接</h3>
+        <div class="url-input-wrapper">
+          <input
+            v-model="videoUrl"
+            type="text"
+            class="url-input"
+            placeholder="粘贴视频页面链接..."
+          />
+          <button class="play-btn" @click="handlePlay" :disabled="!videoUrl || loading">
+            {{ loading ? '解析中...' : '播放' }}
+          </button>
+        </div>
+        <p class="url-hint" v-if="selectedSource">
+          从 {{ getSourceName(selectedSource) }} 复制视频链接粘贴到上方
+        </p>
       </div>
 
       <!-- 剧集选择 -->
@@ -123,25 +126,71 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getVideoDetail, getSeasonDetail, getPlaySources, getParseConfigs, updateHistory } from '../api'
+import { getVideoDetail, getSeasonDetail } from '../api'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
+
+// 默认视频解析服务列表
+const DEFAULT_API_LIST = [
+  { value: 'https://jx.xmflv.com/?url=', label: '虾米视频解析' },
+  { value: 'https://jx.77flv.cc/?url=', label: '七七云解析' },
+  { value: 'https://jx.playerjy.com/?url=', label: 'Player-JY' },
+  { value: 'https://jiexi.789jiexi.icu:4433/?url=', label: '789解析' },
+  { value: 'https://jx.2s0.cn/player/?url=', label: '极速解析' },
+  { value: 'https://bd.jx.cn/?url=', label: '冰豆解析' },
+  { value: 'https://jx.973973.xyz/?url=', label: '973解析' },
+  { value: 'https://www.ckplayer.vip/jiexi/?url=', label: 'CK' },
+  { value: 'https://jx.nnxv.cn/tv.php?url=', label: '七哥解析' },
+  { value: 'https://www.yemu.xyz/?url=', label: '夜幕' },
+  { value: 'https://www.pangujiexi.com/jiexi/?url=', label: '盘古' },
+  { value: 'https://www.playm3u8.cn/jiexi.php?url=', label: 'playm3u8' },
+  { value: 'https://video.isyour.love/player/getplayer?url=', label: '芒果TV1' },
+  { value: 'https://im1907.top/?jx=', label: '芒果TV2' },
+  { value: 'https://jx.hls.one/?url=', label: 'HLS解析' },
+  { value: 'https://jx.jsonplayer.com/player/?url=', label: 'JSON解析' },
+  { value: 'https://jx.dj6u.com/?url=', label: 'DJ6U解析' },
+  { value: 'https://jx.rdhk.net/?v=', label: 'RDHK解析' },
+  { value: 'https://api.okjx.cc:3389/jx.php?url=', label: 'OKJX解析1' },
+  { value: 'https://okjx.cc/?url=', label: 'OKJX解析2' },
+  { value: 'https://jx.aidouer.net/?url=', label: 'Aidouer解析' },
+  { value: 'https://jx.iztyy.com/Bei/?url=', label: 'iztyy解析' },
+  { value: 'https://jx.yparse.com/index.php?url=', label: 'yparse解析' },
+  { value: 'https://www.mtosz.com/m3u8.php?url=', label: 'mtosz解析' },
+  { value: 'https://jx.m3u8.tv/jiexi/?url=', label: 'm3u8tv解析' },
+  { value: 'https://parse.123mingren.com/?url=', label: '123明人解析' },
+  { value: 'https://jx.4kdv.com/?url=', label: '4K解析' },
+  { value: 'https://ckmov.ccyjjd.com/ckmov/?url=', label: 'CK解析' },
+  { value: 'https://www.8090g.cn/?url=', label: '8090G解析' },
+  { value: 'https://api.qianqi.net/vip/?url=', label: '千奇解析' },
+  { value: 'https://vip.laobandq.com/jiexi.php?url=', label: '老板解析' },
+  { value: 'https://www.administratorw.com/video.php?url=', label: '管理员解析' },
+  { value: 'https://go.yh0523.cn/y.cy?url=', label: '解析14' },
+  { value: 'https://jx.blbo.cc:4433/?url=', label: '人迷解析' },
+  { value: 'http://27.124.4.42:4567/jhjson/ceshi.php?url=', label: '第一解析' },
+  { value: 'https://jx.zui.cm/?url=', label: '最先解析' },
+  { value: 'https://za.kuanjv.com/?url=', label: '王牌解析' },
+  { value: 'http://47.98.234.2:7768/api.php?url=', label: '293' },
+  { value: 'https://play.fuqizhishi.com/maotv/API.php?appkey=xiongdimenbieguaiwodingbuzhulegailekey07201538&url=', label: '云you秒解' }
+]
+
+// 视频源列表
+const videoSources = [
+  { value: 'https://v.qq.com', label: '腾讯视频' },
+  { value: 'https://www.iqiyi.com', label: '爱奇艺' },
+  { value: 'https://www.youku.com', label: '优酷' },
+  { value: 'https://www.bilibili.com', label: '哔哩哔哩' },
+  { value: 'https://www.mgtv.com', label: '芒果TV' }
+]
 
 const route = useRoute()
 const video = ref(null)
-const sources = ref([])
-const parseConfigs = ref([])
-const currentSource = ref(null)
-const currentUrl = ref('')
 const loading = ref(false)
-const controlsVisible = ref(true)
-const isPlaying = ref(false)
-const currentTime = ref(0)
-const duration = ref(0)
-const progress = ref(0)
+const currentUrl = ref('')
+const selectedSource = ref('https://v.qq.com')
+const selectedParser = ref(DEFAULT_API_LIST[0].value)
+const parserServices = ref(DEFAULT_API_LIST)
+const videoUrl = ref('')
 const currentSeason = ref(1)
 const currentEpisode = ref(1)
-
-let hideControlsTimer = null
 
 const mediaType = () => route.params.media_type || 'movie'
 const tmdbId = () => parseInt(route.params.id)
@@ -168,17 +217,16 @@ const formatRuntime = (minutes) => {
   return h ? `${h}h ${m}m` : `${m}m`
 }
 
+const getSourceName = (url) => {
+  const source = videoSources.find(s => s.value === url)
+  return source ? source.label : url
+}
+
 const loadData = async () => {
   loading.value = true
   try {
-    const [detailRes, sourcesRes, configsRes] = await Promise.all([
-      getVideoDetail(mediaType(), tmdbId()),
-      getPlaySources(),
-      getParseConfigs()
-    ])
+    const detailRes = await getVideoDetail(mediaType(), tmdbId())
     video.value = detailRes.data
-    sources.value = sourcesRes.data
-    parseConfigs.value = configsRes.data
 
     if (video.value?.seasons?.length) {
       currentSeason.value = video.value.seasons[0].season_number
@@ -201,18 +249,6 @@ const loadSeasonDetail = async (season) => {
   } catch {}
 }
 
-const playSource = (source) => {
-  currentSource.value = source
-  if (source.type === 'parse') {
-    const config = parseConfigs.value.find(c => c.id === source.parse_config_id) || parseConfigs.value[0]
-    if (config) {
-      currentUrl.value = config.base_url + encodeURIComponent(source.url)
-    }
-  } else {
-    currentUrl.value = source.url
-  }
-}
-
 const selectSeason = (season) => {
   currentSeason.value = season
   loadSeasonDetail(season)
@@ -222,43 +258,21 @@ const selectEpisode = (episode) => {
   currentEpisode.value = episode
 }
 
-const showControls = () => {
-  controlsVisible.value = true
-  clearTimeout(hideControlsTimer)
-  hideControlsTimer = setTimeout(() => {
-    controlsVisible.value = false
-  }, 3000)
-}
-
-const hideControls = () => {
-  hideControlsTimer = setTimeout(() => {
-    controlsVisible.value = false
-  }, 1000)
-}
-
-const seekVideo = (e) => {
-  const rect = e.currentTarget.getBoundingClientRect()
-  const percent = (e.clientX - rect.left) / rect.width
-  progress.value = percent * 100
-  currentTime.value = (percent * duration.value)
-}
-
-const saveProgress = async () => {
-  if (video.value) {
-    try {
-      await updateHistory(video.value.tmdb_id, {
-        progress: currentTime.value,
-        duration: duration.value,
-        source_id: currentSource.value?.id
-      })
-    } catch {}
+const handlePlay = () => {
+  if (!videoUrl.value) {
+    ElMessage.warning('请输入视频链接')
+    return
   }
+
+  // 使用选中的解析服务解析视频链接
+  const parsedUrl = selectedParser.value + encodeURIComponent(videoUrl.value)
+  currentUrl.value = parsedUrl
+  ElMessage.success('正在解析播放...')
 }
 
 watch(() => route.params.id, loadData)
 
 onMounted(loadData)
-onUnmounted(saveProgress)
 </script>
 
 <style scoped>
@@ -296,6 +310,7 @@ onUnmounted(saveProgress)
   background: radial-gradient(ellipse at center, transparent 30%, #000 100%);
 }
 
+/* 返回按钮 */
 .back-btn {
   position: fixed;
   top: 24px;
@@ -315,10 +330,16 @@ onUnmounted(saveProgress)
 .back-btn:hover {
   background: rgba(255,255,255,0.2);
 }
-.video-title {
+
+.header-title {
+  position: fixed;
+  top: 24px;
+  left: 80px;
+  z-index: 100;
   font-size: 16px;
   font-weight: 600;
   color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.5);
 }
 
 .player-main {
@@ -341,74 +362,18 @@ onUnmounted(saveProgress)
   justify-content: center;
   background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%);
 }
+.placeholder-content {
+  text-align: center;
+  color: #666;
+}
 .placeholder-icon {
   font-size: 80px;
   opacity: 0.2;
+  display: block;
+  margin-bottom: 16px;
 }
-
-.player-controls {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-.player-controls.visible {
-  opacity: 1;
-}
-.progress-bar {
-  height: 20px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  margin-bottom: 12px;
-}
-.progress-track {
-  width: 100%;
-  height: 4px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 2px;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
-  border-radius: 2px;
-}
-.controls-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.controls-left,
-.controls-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.ctrl-btn {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px;
-  opacity: 0.8;
-  transition: opacity 0.2s;
-}
-.ctrl-btn:hover {
-  opacity: 1;
-}
-.play-btn {
-  font-size: 24px;
-}
-.time-display {
-  font-size: 12px;
-  color: #ccc;
-  margin-left: 8px;
+.placeholder-content p {
+  font-size: 14px;
 }
 
 /* 右侧面板 */
@@ -436,26 +401,19 @@ onUnmounted(saveProgress)
   gap: 12px;
   font-size: 13px;
   color: #888;
-  margin-bottom: 12px;
 }
 .info-meta .rating {
   color: #f5a623;
 }
-.info-overview {
-  font-size: 13px;
-  line-height: 1.6;
-  color: #999;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
 
-.sources-section {
+.sources-section,
+.parser-section,
+.url-section,
+.episodes-section {
   padding: 20px 24px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
 }
+
 .section-title {
   font-size: 12px;
   color: #666;
@@ -463,53 +421,95 @@ onUnmounted(saveProgress)
   letter-spacing: 1px;
   margin: 0 0 16px;
 }
-.source-list {
-  display: flex;
-  flex-direction: column;
+
+/* 视频源网格 */
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
 }
-.source-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
+.source-btn {
+  padding: 12px;
   background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
+  color: #ccc;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 }
-.source-item:hover {
+.source-btn:hover {
   background: rgba(255,255,255,0.1);
 }
-.source-item.active {
+.source-btn.active {
   background: rgba(99, 102, 241, 0.2);
-  border: 1px solid rgba(99, 102, 241, 0.4);
-}
-.source-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.source-name {
-  font-size: 14px;
+  border-color: rgba(99, 102, 241, 0.4);
   color: #fff;
 }
-.source-speed {
-  font-size: 12px;
-  color: #666;
+
+/* 解析服务选择 */
+.parser-select {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
 }
-.source-speed.untested {
-  color: #888;
-}
-.active-indicator {
-  color: #6366f1;
-  font-size: 12px;
+.parser-select option {
+  background: #1a1a2e;
+  color: #fff;
 }
 
-.episodes-section {
-  padding: 20px 24px;
-  flex: 1;
+/* URL 输入 */
+.url-input-wrapper {
+  display: flex;
+  gap: 8px;
 }
+.url-input {
+  flex: 1;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+}
+.url-input::placeholder {
+  color: #666;
+}
+.url-input:focus {
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.5);
+}
+.play-btn {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.play-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+.play-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.url-hint {
+  font-size: 12px;
+  color: #666;
+  margin: 8px 0 0;
+}
+
+/* 剧集选择 */
 .season-tabs {
   display: flex;
   gap: 8px;
