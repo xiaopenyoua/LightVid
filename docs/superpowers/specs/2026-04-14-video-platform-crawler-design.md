@@ -28,10 +28,31 @@
 
 | 组件 | 技术 | 说明 |
 |------|------|------|
-| 浏览器自动化 | Playwright | 模拟浏览器，支持腾讯/爱奇艺/优酷/哔哩哔哩/芒果TV |
+| 浏览器自动化 | Playwright | 模拟浏览器，作为主要爬取方式 |
+| HTTP 爬虫 | httpx + BeautifulSoup | 直接请求搜索页，速度快，作为备用 |
 | 视频解析 | 复用现有解析服务 | 40+ 解析服务可选 |
 | 视频播放 | HLS.js | 前端播放 m3u8，不依赖 iframe |
 | 爬虫存储 | SQLite | 缓存播放页面 URL，减少重复爬取 |
+
+### 3.2 并行探测架构
+
+```
+用户请求播放
+    ↓
+┌─────────────────────────────────────┐
+│         并行探测（最快者胜出）          │
+├─────────────────┬───────────────────┤
+│ Playwright      │ httpx + BeautifulSoup
+│ 浏览器自动化     │ 直接 HTTP 请求     │
+│ 速度慢但成功率高  │ 速度快但可能被拦截 │
+└────────┬────────┴────────┬──────────┘
+         ↓                 ↓
+         任意一方先返回有效链接
+              ↓
+         解析 + 播放
+```
+
+优先级：HTTP 爬虫先发起，Playwright 作为保底，两者并行竞争，先到先得。
 
 ### 3.2 目录结构
 
@@ -145,21 +166,88 @@ Response:
 
 ## 6. 各平台爬虫实现
 
-### 6.1 通用流程
+### 6.1 爬虫接口设计
 
-每个平台的爬虫遵循统一接口：
+每个平台的爬虫遵循统一接口，支持两种模式：
 
 ```python
 class BasePlatformCrawler(ABC):
     @abstractmethod
-    async def search(self, keyword: str, year: int = None) -> Optional[str]:
-        """搜索影片，返回播放页面 URL"""
-        pass
-
-    @abstractmethod
     def get_search_url(self, keyword: str) -> str:
         """获取搜索页 URL"""
         pass
+
+    # HTTP 爬虫模式（快速优先）
+    async def search_http(self, keyword: str, year: int = None) -> Optional[str]:
+        """直接 HTTP 请求搜索，返回播放页面 URL"""
+        pass
+
+    # Playwright 爬虫模式（保底）
+    async def search_browser(self, keyword: str, year: int = None) -> Optional[str]:
+        """浏览器自动化搜索，返回播放页面 URL"""
+        pass
+```
+
+### 6.2 并行搜索调度
+
+```python
+async def search_with_fallback(keyword: str, year: int = None) -> Optional[str]:
+    """并行探测，HTTP 优先，Playwright 保底"""
+    tasks = [
+        asyncio.create_task(crawler.search_http(keyword, year)),
+        asyncio.create_task(crawler.search_browser(keyword, year)),
+    ]
+
+    for done_task in asyncio.as_completed(tasks):
+        result = await done_task
+        if result:
+            # 取消其他任务
+            for task in tasks:
+                task.cancel()
+            return result
+
+    return None
+```
+
+### 6.3 腾讯视频爬虫示例
+
+#### HTTP 模式
+
+```python
+async def search_http(self, keyword: str, year: int = None) -> Optional[str]:
+    async with httpx.AsyncClient(
+        timeout=httpx.Timeout(10.0),
+        headers={"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)"}
+    ) as client:
+        search_url = f"https://v.qq.com/x/search/?q={quote(keyword)}&stag=0&buf=0"
+        resp = await client.get(search_url, follow_redirects=True)
+        soup = BeautifulSoup(resp.text, "lxml")
+
+        # 查找搜索结果中的播放链接
+        for item in soup.select(".result_item"):
+            title = item.select_one(".title")
+            if title and keyword in title.text:
+                link = item.select_one("a")
+                if link:
+                    return link.get("href")
+
+    return None
+```
+
+#### Playwright 模式
+
+```python
+async def search_browser(self, keyword: str, year: int = None) -> Optional[str]:
+    async with get_browser() as page:
+        search_url = f"https://v.qq.com/search.html?page=1&q={quote(keyword)}"
+        await page.goto(search_url, wait_until="networkidle")
+        await page.wait_for_selector(".result_item", timeout=10000)
+
+        first_result = await page.query_selector(".result_item a")
+        if first_result:
+            return await first_result.get_attribute("href")
+
+    return None
 ```
 
 ### 6.2 腾讯视频爬虫示例
@@ -246,26 +334,27 @@ class TencentCrawler(BasePlatformCrawler):
 ## 10. 实施计划
 
 ### Phase 1: 基础架构
-- [ ] 安装 Playwright
+- [ ] 安装 Playwright 及其依赖
 - [ ] 实现浏览器池管理
-- [ ] 实现数据库模型
+- [ ] 实现 HTTP 爬虫基类
+- [ ] 实现数据库模型 VideoPlatformLink
 
-### Phase 2: 爬虫实现
-- [ ] 实现 BasePlatformCrawler 基类
-- [ ] 实现腾讯视频爬虫
-- [ ] 实现爱奇艺爬虫
-- [ ] 实现优酷爬虫
-- [ ] 实现哔哩哔哩爬虫
-- [ ] 实现芒果TV爬虫
+### Phase 2: 爬虫实现（并行开发）
+- [ ] 实现腾讯视频爬虫（HTTP + Playwright）
+- [ ] 实现爱奇艺爬虫（HTTP + Playwright）
+- [ ] 实现优酷爬虫（HTTP + Playwright）
+- [ ] 实现哔哩哔哩爬虫（HTTP + Playwright）
+- [ ] 实现芒果TV爬虫（HTTP + Playwright）
 
 ### Phase 3: API 开发
-- [ ] 实现搜索 API
-- [ ] 实现解析 API
+- [ ] 实现并行搜索调度器
+- [ ] 实现搜索 API `/api/search/video-link`
+- [ ] 实现解析 API `/api/play/resolve`
 - [ ] 实现解析服务管理
 
 ### Phase 4: 前端改造
-- [ ] 改造 Play.vue
-- [ ] 集成 HLS.js
+- [ ] 改造 Play.vue，移除手动输入链接
+- [ ] 集成 HLS.js 播放 m3u8
 - [ ] 测试完整流程
 
 ## 11. 风险与缓解
