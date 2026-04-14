@@ -341,3 +341,9 @@ async def search_browser(self, keyword: str, year: int = None) -> Optional[str]:
 | 解析服务不稳定 | 维护多个解析服务，自动切换 |
 | 浏览器资源占用 | 使用浏览器池复用，控制并发数 |
 | IP 被封 | 考虑使用代理池（可选） |
+
+# Test with curl
+curl http://localhost:8642/v1/chat/completions \
+  -H "Authorization: Bearer 9d3e948c821c44e4a094b72b3ec62e23" \
+  -H "Content-Type: application/json" \
+  -d '{"model": "hermes-agent", "messages": [{"role": "user", "content": "Hello!"}]}'
