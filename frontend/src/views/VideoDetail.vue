@@ -244,8 +244,8 @@ onMounted(loadDetail)
 /* 返回按钮 */
 .back-button {
   position: fixed;
-  top: 80px;
-  left: 48px;
+  top: 24px;
+  left: 24px;
   z-index: 100;
   width: 40px;
   height: 40px;
