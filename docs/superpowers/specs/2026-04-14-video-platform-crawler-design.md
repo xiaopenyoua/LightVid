@@ -250,30 +250,6 @@ async def search_browser(self, keyword: str, year: int = None) -> Optional[str]:
     return None
 ```
 
-### 6.2 腾讯视频爬虫示例
-
-```python
-class TencentCrawler(BasePlatformCrawler):
-    SEARCH_URL = "https://v.qq.com/search.html?page=1&search失常"
-    PLAYER_URL_PATTERN = "https://v.qq.com/x/cover/{cover_id}.html"
-
-    async def search(self, keyword: str, year: int = None) -> Optional[str]:
-        async with get_browser() as page:
-            # 1. 访问搜索页
-            search_url = self.get_search_url(keyword)
-            await page.goto(search_url, wait_until="networkidle")
-
-            # 2. 等待搜索结果加载
-            await page.wait_for_selector(".result_item", timeout=10000)
-
-            # 3. 提取第一个结果的链接
-            first_result = await page.query_selector(".result_item a")
-            if first_result:
-                return await first_result.get_attribute("href")
-
-        return None
-```
-
 ### 6.3 各平台注意事项
 
 | 平台 | 搜索 URL | 反爬策略 |
