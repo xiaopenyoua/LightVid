@@ -14,8 +14,14 @@
 
       <!-- 播放器主体 -->
       <div class="player-main">
+        <video
+          v-if="m3u8Url"
+          class="player-video"
+          controls
+          autoplay
+        ></video>
         <iframe
-          v-if="currentUrl"
+          v-else-if="currentUrl"
           :src="currentUrl"
           class="player-iframe"
           frameborder="0"
@@ -24,7 +30,7 @@
         <div v-else class="player-placeholder">
           <div class="placeholder-content">
             <span class="placeholder-icon">▶</span>
-            <p>请在右侧选择视频源并输入链接</p>
+            <p>请在右侧选择视频源并点击播放按钮</p>
           </div>
         </div>
       </div>
@@ -68,23 +74,11 @@
         </select>
       </div>
 
-      <!-- 视频链接输入 -->
-      <div class="url-section">
-        <h3 class="section-title">视频链接</h3>
-        <div class="url-input-wrapper">
-          <input
-            v-model="videoUrl"
-            type="text"
-            class="url-input"
-            placeholder="粘贴视频页面链接..."
-          />
-          <button class="play-btn" @click="handlePlay" :disabled="!videoUrl || loading">
-            {{ loading ? '解析中...' : '播放' }}
-          </button>
-        </div>
-        <p class="url-hint" v-if="selectedSource">
-          从 {{ getSourceName(selectedSource) }} 复制视频链接粘贴到上方
-        </p>
+      <!-- 播放按钮 -->
+      <div class="play-section">
+        <button class="play-btn-large" @click="handlePlay" :disabled="loading">
+          {{ loading ? '解析中...' : '播放' }}
+        </button>
       </div>
 
       <!-- 剧集选择 -->
@@ -127,68 +121,28 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getVideoDetail, getSeasonDetail } from '../api'
+import { getPlatforms, searchVideoLink, resolveVideo } from '../api/search'
+import Hls from 'hls.js'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
-
-// 默认视频解析服务列表
-const DEFAULT_API_LIST = [
-  { value: 'https://jx.xmflv.com/?url=', label: '虾米视频解析' },
-  { value: 'https://jx.77flv.cc/?url=', label: '七七云解析' },
-  { value: 'https://jx.playerjy.com/?url=', label: 'Player-JY' },
-  { value: 'https://jiexi.789jiexi.icu:4433/?url=', label: '789解析' },
-  { value: 'https://jx.2s0.cn/player/?url=', label: '极速解析' },
-  { value: 'https://bd.jx.cn/?url=', label: '冰豆解析' },
-  { value: 'https://jx.973973.xyz/?url=', label: '973解析' },
-  { value: 'https://www.ckplayer.vip/jiexi/?url=', label: 'CK' },
-  { value: 'https://jx.nnxv.cn/tv.php?url=', label: '七哥解析' },
-  { value: 'https://www.yemu.xyz/?url=', label: '夜幕' },
-  { value: 'https://www.pangujiexi.com/jiexi/?url=', label: '盘古' },
-  { value: 'https://www.playm3u8.cn/jiexi.php?url=', label: 'playm3u8' },
-  { value: 'https://video.isyour.love/player/getplayer?url=', label: '芒果TV1' },
-  { value: 'https://im1907.top/?jx=', label: '芒果TV2' },
-  { value: 'https://jx.hls.one/?url=', label: 'HLS解析' },
-  { value: 'https://jx.jsonplayer.com/player/?url=', label: 'JSON解析' },
-  { value: 'https://jx.dj6u.com/?url=', label: 'DJ6U解析' },
-  { value: 'https://jx.rdhk.net/?v=', label: 'RDHK解析' },
-  { value: 'https://api.okjx.cc:3389/jx.php?url=', label: 'OKJX解析1' },
-  { value: 'https://okjx.cc/?url=', label: 'OKJX解析2' },
-  { value: 'https://jx.aidouer.net/?url=', label: 'Aidouer解析' },
-  { value: 'https://jx.iztyy.com/Bei/?url=', label: 'iztyy解析' },
-  { value: 'https://jx.yparse.com/index.php?url=', label: 'yparse解析' },
-  { value: 'https://www.mtosz.com/m3u8.php?url=', label: 'mtosz解析' },
-  { value: 'https://jx.m3u8.tv/jiexi/?url=', label: 'm3u8tv解析' },
-  { value: 'https://parse.123mingren.com/?url=', label: '123明人解析' },
-  { value: 'https://jx.4kdv.com/?url=', label: '4K解析' },
-  { value: 'https://ckmov.ccyjjd.com/ckmov/?url=', label: 'CK解析' },
-  { value: 'https://www.8090g.cn/?url=', label: '8090G解析' },
-  { value: 'https://api.qianqi.net/vip/?url=', label: '千奇解析' },
-  { value: 'https://vip.laobandq.com/jiexi.php?url=', label: '老板解析' },
-  { value: 'https://www.administratorw.com/video.php?url=', label: '管理员解析' },
-  { value: 'https://go.yh0523.cn/y.cy?url=', label: '解析14' },
-  { value: 'https://jx.blbo.cc:4433/?url=', label: '人迷解析' },
-  { value: 'http://27.124.4.42:4567/jhjson/ceshi.php?url=', label: '第一解析' },
-  { value: 'https://jx.zui.cm/?url=', label: '最先解析' },
-  { value: 'https://za.kuanjv.com/?url=', label: '王牌解析' },
-  { value: 'http://47.98.234.2:7768/api.php?url=', label: '293' },
-  { value: 'https://play.fuqizhishi.com/maotv/API.php?appkey=xiongdimenbieguaiwodingbuzhulegailekey07201538&url=', label: '云you秒解' }
-]
 
 // 视频源列表
 const videoSources = [
-  { value: 'https://v.qq.com', label: '腾讯视频' },
-  { value: 'https://www.iqiyi.com', label: '爱奇艺' },
-  { value: 'https://www.youku.com', label: '优酷' },
-  { value: 'https://www.bilibili.com', label: '哔哩哔哩' },
-  { value: 'https://www.mgtv.com', label: '芒果TV' }
+  { value: 'tencent', label: '腾讯视频' },
+  { value: 'iqiyi', label: '爱奇艺' },
+  { value: 'youku', label: '优酷' },
+  { value: 'bilibili', label: '哔哩哔哩' },
+  { value: 'mgtv', label: '芒果TV' }
 ]
 
 const route = useRoute()
 const video = ref(null)
 const loading = ref(false)
 const currentUrl = ref('')
-const selectedSource = ref('https://v.qq.com')
-const selectedParser = ref(DEFAULT_API_LIST[0].value)
-const parserServices = ref(DEFAULT_API_LIST)
-const videoUrl = ref('')
+const selectedSource = ref('tencent')
+const selectedParser = ref('')
+const parserServices = ref([])
+const m3u8Url = ref('')
+const hlsInstance = ref(null)
 const currentSeason = ref(1)
 const currentEpisode = ref(1)
 
@@ -217,14 +171,24 @@ const formatRuntime = (minutes) => {
   return h ? `${h}h ${m}m` : `${m}m`
 }
 
-const getSourceName = (url) => {
-  const source = videoSources.find(s => s.value === url)
-  return source ? source.label : url
+const getSourceName = (platform) => {
+  const source = videoSources.find(s => s.value === platform)
+  return source ? source.label : platform
 }
 
 const loadData = async () => {
   loading.value = true
   try {
+    // 获取解析服务列表
+    const parserRes = await getPlatforms()
+    parserServices.value = parserRes.data.map(p => ({
+      value: p.id,
+      label: p.name
+    }))
+    if (parserServices.value.length) {
+      selectedParser.value = parserServices.value[0].value
+    }
+
     const detailRes = await getVideoDetail(mediaType(), tmdbId())
     video.value = detailRes.data
 
@@ -258,17 +222,72 @@ const selectEpisode = (episode) => {
   currentEpisode.value = episode
 }
 
-const handlePlay = () => {
-  if (!videoUrl.value) {
-    ElMessage.warning('请输入视频链接')
+const handlePlay = async () => {
+  if (!video.value) {
+    ElMessage.warning('请先选择要播放的影片')
     return
   }
 
-  // 使用选中的解析服务解析视频链接
-  const parsedUrl = selectedParser.value + encodeURIComponent(videoUrl.value)
-  currentUrl.value = parsedUrl
-  ElMessage.success('正在解析播放...')
+  loading.value = true
+  try {
+    // 1. 搜索视频播放链接
+    const searchRes = await searchVideoLink({
+      tmdb_id: video.value.tmdb_id || parseInt(route.params.id),
+      media_type: mediaType(),
+      platform: selectedSource.value,
+      title: video.value.title,
+      year: video.value.release_date ? parseInt(video.value.release_date.slice(0, 4)) : null
+    })
+
+    const platformUrl = searchRes.data.platform_url
+
+    // 2. 解析为 m3u8
+    const resolveRes = await resolveVideo({
+      platform_url: platformUrl
+    })
+
+    const m3u8 = resolveRes.data.m3u8_url
+
+    // 3. 使用 HLS.js 播放
+    playM3u8(m3u8)
+
+    ElMessage.success('正在播放...')
+  } catch (err) {
+    const msg = err.response?.data?.detail || '播放失败'
+    ElMessage.error(msg)
+  } finally {
+    loading.value = false
+  }
 }
+
+const playM3u8 = (url) => {
+  const videoEl = document.querySelector('.player-video')
+
+  // 清理旧实例
+  if (hlsInstance.value) {
+    hlsInstance.value.destroy()
+  }
+
+  if (Hls.isSupported()) {
+    const hls = new Hls()
+    hls.loadSource(url)
+    hls.attachMedia(videoEl)
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      videoEl.play()
+    })
+    hlsInstance.value = hls
+  } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+    // Safari 原生支持 HLS
+    videoEl.src = url
+    videoEl.play()
+  }
+}
+
+onUnmounted(() => {
+  if (hlsInstance.value) {
+    hlsInstance.value.destroy()
+  }
+})
 
 watch(() => route.params.id, loadData)
 
@@ -350,6 +369,11 @@ onMounted(loadData)
   align-items: center;
   justify-content: center;
 }
+.player-video {
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
 .player-iframe {
   width: 100%;
   height: 100%;
@@ -408,7 +432,7 @@ onMounted(loadData)
 
 .sources-section,
 .parser-section,
-.url-section,
+.play-section,
 .episodes-section {
   padding: 20px 24px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -463,50 +487,26 @@ onMounted(loadData)
   color: #fff;
 }
 
-/* URL 输入 */
-.url-input-wrapper {
-  display: flex;
-  gap: 8px;
-}
-.url-input {
-  flex: 1;
-  padding: 12px 16px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  color: #fff;
-  font-size: 14px;
-}
-.url-input::placeholder {
-  color: #666;
-}
-.url-input:focus {
-  outline: none;
-  border-color: rgba(99, 102, 241, 0.5);
-}
-.play-btn {
-  padding: 12px 20px;
+/* 播放按钮 */
+.play-btn-large {
+  width: 100%;
+  padding: 16px 24px;
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   color: #fff;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
 }
-.play-btn:hover:not(:disabled) {
+.play-btn-large:hover:not(:disabled) {
   transform: scale(1.02);
   box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
-.play-btn:disabled {
+.play-btn-large:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-.url-hint {
-  font-size: 12px;
-  color: #666;
-  margin: 8px 0 0;
 }
 
 /* 剧集选择 */
