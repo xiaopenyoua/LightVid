@@ -6,8 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 TVBOX_SOURCE_URLS = [
-    "https://raw.githubusercontent.com/zbh2535/TVBox/main/lives.json",
-    "https://raw.githubusercontent.com/zbh2535/TVBox/main/movies.json",
+    "https://tvbox.wpcoder.cn/user.php",
 ]
 
 MAX_RETRIES = 3

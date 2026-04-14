@@ -5,5 +5,6 @@ from .watch_history import WatchHistory
 from .favorite import Favorite
 from .tmdb_genre import TmdbGenre
 from .tmdb_cached_list import TmdbCachedList
+from .video_platform_link import VideoPlatformLink
 
-__all__ = ["Base", "VideoSource", "ParseConfig", "WatchHistory", "Favorite", "TmdbGenre", "TmdbCachedList"]
+__all__ = ["Base", "VideoSource", "ParseConfig", "WatchHistory", "Favorite", "TmdbGenre", "TmdbCachedList", "VideoPlatformLink"]
