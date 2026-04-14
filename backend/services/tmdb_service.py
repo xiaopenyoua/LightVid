@@ -116,6 +116,46 @@ class TMDBService:
             print(f"[TMDB] 获取电视剧详情失败: {e}")
             return None
 
+    async def get_movie_credits(self, movie_id: int) -> Optional[dict]:
+        """
+        获取电影演员信息
+        """
+        if not self.api_key:
+            print("[TMDB] API key 未配置")
+            return None
+
+        url = f"{self.base_url}/movie/{movie_id}/credits"
+        params = {"api_key": self.api_key, "language": LANGUAGE}
+
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.get(url, params=params)
+                resp.raise_for_status()
+                return resp.json()
+        except Exception as e:
+            print(f"[TMDB] 获取电影演员失败: {e}")
+            return None
+
+    async def get_tv_credits(self, tv_id: int) -> Optional[dict]:
+        """
+        获取电视剧演员信息
+        """
+        if not self.api_key:
+            print("[TMDB] API key 未配置")
+            return None
+
+        url = f"{self.base_url}/tv/{tv_id}/credits"
+        params = {"api_key": self.api_key, "language": LANGUAGE}
+
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.get(url, params=params)
+                resp.raise_for_status()
+                return resp.json()
+        except Exception as e:
+            print(f"[TMDB] 获取电视剧演员失败: {e}")
+            return None
+
     async def get_trending(self, media_type: str = "all", time_window: str = "week") -> list[dict]:
         """
         获取热门内容

@@ -166,9 +166,34 @@ async def get_detail(media_type: str, tmdb_id: int):
             "poster_url": tmdb_service.format_poster_url(s.get("poster_path")) if s.get("poster_path") else None,
         })
 
+    # 获取演员信息
+    credits = await tmdb_service.get_movie_credits(tmdb_id) if media_type == "movie" else await tmdb_service.get_tv_credits(tmdb_id)
+    cast = []
+    if credits:
+        for person in credits.get("cast", [])[:12]:  # 取前12个演员
+            cast.append({
+                "id": person.get("id"),
+                "name": person.get("name"),
+                "character": person.get("character"),
+                "job": person.get("known_for_department"),
+                "profile_path": tmdb_service.format_poster_url(person.get("profile_path"), "w185") if person.get("profile_path") else None,
+            })
+        # 添加导演
+        for person in credits.get("crew", []):
+            if person.get("job") == "Director":
+                cast.append({
+                    "id": person.get("id"),
+                    "name": person.get("name"),
+                    "character": None,
+                    "job": "导演",
+                    "profile_path": tmdb_service.format_poster_url(person.get("profile_path"), "w185") if person.get("profile_path") else None,
+                })
+                break
+
     return {
         "tmdb_id": details.get("id"),
         "title": title,
+        "original_title": details.get("original_title") or details.get("original_name"),
         "media_type": media_type,
         "poster_url": tmdb_service.format_poster_url(details.get("poster_path")),
         "backdrop_url": tmdb_service.format_poster_url(details.get("backdrop_path"), "w780"),
@@ -178,10 +203,11 @@ async def get_detail(media_type: str, tmdb_id: int):
         "release_date": release_date,
         "genres": genres_str,
         "genre_ids": genre_ids_str,
-        "runtime": details.get("runtime") or details.get("episode_run_time", []),
+        "runtime": details.get("runtime") or (details.get("episode_run_time", [None])[0] if details.get("episode_run_time") else None),
         "status": details.get("status"),
         "tagline": details.get("tagline"),
         "seasons": formatted_seasons if media_type == "tv" else None,
+        "cast": cast,
     }
 
 
