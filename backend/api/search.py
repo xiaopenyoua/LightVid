@@ -16,6 +16,8 @@ class VideoLinkRequest(BaseModel):
     platform: str  # tencent / iqiyi / youku / bilibili / mgtv
     title: str
     year: int = None
+    season: int = None  # 剧集第几季
+    episode: int = None  # 剧集第几集
 
 
 class VideoLinkResponse(BaseModel):
@@ -47,6 +49,8 @@ async def get_video_link(request: VideoLinkRequest, db: Session = Depends(get_db
         platform=request.platform,
         title=request.title,
         year=request.year,
+        season=request.season,
+        episode=request.episode,
     )
 
     if not result:

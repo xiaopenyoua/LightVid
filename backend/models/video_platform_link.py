@@ -13,6 +13,8 @@ class VideoPlatformLink(Base):
     platform = Column(String, nullable=False, index=True)  # tencent / iqiyi / youku / bilibili / mgtv
     platform_url = Column(String, nullable=False)
     title = Column(String)  # 平台返回的标题，用于匹配
+    season = Column(Integer, nullable=True)  # 剧集第几季
+    episode = Column(Integer, nullable=True)  # 剧集第几集
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     expires_at = Column(DateTime, nullable=True)  # 缓存过期时间

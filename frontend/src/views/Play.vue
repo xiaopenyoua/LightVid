@@ -264,12 +264,15 @@ const handlePlay = async () => {
   loading.value = true
   try {
     // 1. 搜索视频播放链接
+    const isTv = mediaType() === 'tv'
     const searchRes = await searchVideoLink({
       tmdb_id: video.value.tmdb_id || parseInt(route.params.id),
       media_type: mediaType(),
       platform: selectedSource.value,
       title: video.value.title,
-      year: video.value.release_date ? parseInt(video.value.release_date.slice(0, 4)) : null
+      year: video.value.release_date ? parseInt(video.value.release_date.slice(0, 4)) : null,
+      season: isTv ? currentSeason.value : null,
+      episode: isTv ? currentEpisode.value : null
     })
 
     const platformUrl = searchRes.data.platform_url

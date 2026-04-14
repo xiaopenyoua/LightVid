@@ -33,18 +33,30 @@ async def search_video_link(
     media_type: str,
     platform: str,
     title: str,
-    year: int = None
+    year: int = None,
+    season: int = None,
+    episode: int = None
 ) -> Optional[Dict[str, Any]]:
     """
     搜索视频播放链接
     流程：查缓存 -> HTTP探测 -> 存入缓存 -> 返回
     """
-    # 1. 检查缓存
-    cached = db.query(VideoPlatformLink).filter(
+    # 构建搜索关键词：如果是剧集，加上剧集信息
+    search_keyword = title
+    if media_type == "tv" and season and episode:
+        search_keyword = f"{title} 第{season}季 第{episode}集"
+
+    # 1. 检查缓存（剧集需要更细粒度的缓存）
+    cache_filter = [
         VideoPlatformLink.tmdb_id == tmdb_id,
         VideoPlatformLink.media_type == media_type,
         VideoPlatformLink.platform == platform,
-    ).first()
+    ]
+    if media_type == "tv" and season and episode:
+        cache_filter.append(VideoPlatformLink.season == season)
+        cache_filter.append(VideoPlatformLink.episode == episode)
+
+    cached = db.query(VideoPlatformLink).filter(*cache_filter).first()
 
     if cached:
         # 检查缓存是否过期
@@ -64,7 +76,7 @@ async def search_video_link(
         return None
 
     # 3. HTTP 模式搜索
-    platform_url = await crawler.search_http(title, year)
+    platform_url = await crawler.search_http(search_keyword, year)
 
     if platform_url:
         # 4. 存入缓存
@@ -78,7 +90,9 @@ async def search_video_link(
                 media_type=media_type,
                 platform=platform,
                 platform_url=platform_url,
-                title=title,
+                title=search_keyword,
+                season=season,
+                episode=episode,
                 expires_at=datetime.utcnow() + timedelta(hours=CACHE_EXPIRY_HOURS),
             )
             db.add(cached)
