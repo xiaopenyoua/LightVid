@@ -41,10 +41,8 @@ async def search_video_link(
     搜索视频播放链接
     流程：查缓存 -> HTTP探测 -> 存入缓存 -> 返回
     """
-    # 构建搜索关键词：如果是剧集，加上剧集信息
+    # 构建搜索关键词：搜索主标题（不带集信息），因为 cover 页面是针对整部剧的
     search_keyword = title
-    if media_type == "tv" and season and episode:
-        search_keyword = f"{title} 第{season}季 第{episode}集"
 
     # 1. 检查缓存（剧集需要更细粒度的缓存）
     cache_filter = [
@@ -75,13 +73,25 @@ async def search_video_link(
     if not crawler:
         return None
 
-    # 3. HTTP 模式搜索
+    # 3. HTTP 模式搜索（快速优先）
     platform_url = await crawler.search_http(search_keyword, year)
 
+    # 如果 HTTP 模式失败，尝试浏览器模式（针对 SPA 页面）
+    if not platform_url and hasattr(crawler, 'search_browser'):
+        print(f"[{platform}] HTTP 模式未找到结果，尝试浏览器模式...")
+        platform_url = await crawler.search_browser(search_keyword, year)
+
     if platform_url:
-        # 4. 存入缓存
+        # 4. 如果是剧集且有集数信息，从 cover 页面提取具体集数的播放 URL
+        final_url = platform_url
+        if media_type == "tv" and season and episode and hasattr(crawler, 'get_episode_url'):
+            episode_url = await crawler.get_episode_url(platform_url, season, episode)
+            if episode_url:
+                final_url = episode_url
+
+        # 5. 存入缓存
         if cached:
-            cached.platform_url = platform_url
+            cached.platform_url = final_url
             cached.updated_at = datetime.utcnow()
             cached.expires_at = datetime.utcnow() + timedelta(hours=CACHE_EXPIRY_HOURS)
         else:
@@ -89,7 +99,7 @@ async def search_video_link(
                 tmdb_id=tmdb_id,
                 media_type=media_type,
                 platform=platform,
-                platform_url=platform_url,
+                platform_url=final_url,
                 title=search_keyword,
                 season=season,
                 episode=episode,
@@ -101,7 +111,7 @@ async def search_video_link(
 
         return {
             "platform": platform,
-            "platform_url": platform_url,
+            "platform_url": final_url,
             "title": title,
         }
 
