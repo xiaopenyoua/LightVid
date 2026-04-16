@@ -14,23 +14,25 @@
 
       <!-- 播放器主体 -->
       <div class="player-main">
+        <!-- HLS/m3u8 视频播放 -->
         <video
           v-if="m3u8Url"
           class="player-video"
           controls
           autoplay
         ></video>
-        <iframe
-          v-else-if="currentUrl"
-          :src="currentUrl"
-          class="player-iframe"
-          frameborder="0"
-          allowfullscreen
-        ></iframe>
+
+        <!-- 加载状态 -->
+        <div v-else-if="loading" class="player-loading">
+          <LoadingSpinner :size="60" />
+          <p>{{ loadingText }}</p>
+        </div>
+
+        <!-- 默认占位 -->
         <div v-else class="player-placeholder">
           <div class="placeholder-content">
             <span class="placeholder-icon">▶</span>
-            <p>请在右侧选择视频源并点击播放按钮</p>
+            <p>正在准备播放...</p>
           </div>
         </div>
       </div>
@@ -74,13 +76,6 @@
         </select>
       </div>
 
-      <!-- 播放按钮 -->
-      <div class="play-section">
-        <button class="play-btn-large" @click="handlePlay" :disabled="loading">
-          {{ loading ? '解析中...' : '播放' }}
-        </button>
-      </div>
-
       <!-- 剧集选择 -->
       <div class="episodes-section" v-if="video?.seasons?.length">
         <h3 class="section-title">选集</h3>
@@ -108,65 +103,17 @@
         </div>
       </div>
     </div>
-
-    <!-- 加载状态 -->
-    <div v-if="loading" class="loading-overlay">
-      <LoadingSpinner :size="50" />
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getVideoDetail, getSeasonDetail } from '../api'
-import { searchVideoLink, resolveVideo } from '../api/search'
+import { searchVideoLink, resolveVideo, getParsers } from '../api/search'
 import Hls from 'hls.js'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
-
-// 默认视频解析服务列表
-const DEFAULT_API_LIST = [
-  { value: 'https://jx.xmflv.com/?url=', label: '虾米视频解析' },
-  { value: 'https://jx.77flv.cc/?url=', label: '七七云解析' },
-  { value: 'https://jx.playerjy.com/?url=', label: 'Player-JY' },
-  { value: 'https://jiexi.789jiexi.icu:4433/?url=', label: '789解析' },
-  { value: 'https://jx.2s0.cn/player/?url=', label: '极速解析' },
-  { value: 'https://bd.jx.cn/?url=', label: '冰豆解析' },
-  { value: 'https://jx.973973.xyz/?url=', label: '973解析' },
-  { value: 'https://www.ckplayer.vip/jiexi/?url=', label: 'CK' },
-  { value: 'https://jx.nnxv.cn/tv.php?url=', label: '七哥解析' },
-  { value: 'https://www.yemu.xyz/?url=', label: '夜幕' },
-  { value: 'https://www.pangujiexi.com/jiexi/?url=', label: '盘古' },
-  { value: 'https://www.playm3u8.cn/jiexi.php?url=', label: 'playm3u8' },
-  { value: 'https://video.isyour.love/player/getplayer?url=', label: '芒果TV1' },
-  { value: 'https://im1907.top/?jx=', label: '芒果TV2' },
-  { value: 'https://jx.hls.one/?url=', label: 'HLS解析' },
-  { value: 'https://jx.jsonplayer.com/player/?url=', label: 'JSON解析' },
-  { value: 'https://jx.dj6u.com/?url=', label: 'DJ6U解析' },
-  { value: 'https://jx.rdhk.net/?v=', label: 'RDHK解析' },
-  { value: 'https://api.okjx.cc:3389/jx.php?url=', label: 'OKJX解析1' },
-  { value: 'https://okjx.cc/?url=', label: 'OKJX解析2' },
-  { value: 'https://jx.aidouer.net/?url=', label: 'Aidouer解析' },
-  { value: 'https://jx.iztyy.com/Bei/?url=', label: 'iztyy解析' },
-  { value: 'https://jx.yparse.com/index.php?url=', label: 'yparse解析' },
-  { value: 'https://www.mtosz.com/m3u8.php?url=', label: 'mtosz解析' },
-  { value: 'https://jx.m3u8.tv/jiexi/?url=', label: 'm3u8tv解析' },
-  { value: 'https://parse.123mingren.com/?url=', label: '123明人解析' },
-  { value: 'https://jx.4kdv.com/?url=', label: '4K解析' },
-  { value: 'https://ckmov.ccyjjd.com/ckmov/?url=', label: 'CK解析' },
-  { value: 'https://www.8090g.cn/?url=', label: '8090G解析' },
-  { value: 'https://api.qianqi.net/vip/?url=', label: '千奇解析' },
-  { value: 'https://vip.laobandq.com/jiexi.php?url=', label: '老板解析' },
-  { value: 'https://www.administratorw.com/video.php?url=', label: '管理员解析' },
-  { value: 'https://go.yh0523.cn/y.cy?url=', label: '解析14' },
-  { value: 'https://jx.blbo.cc:4433/?url=', label: '人迷解析' },
-  { value: 'http://27.124.4.42:4567/jhjson/ceshi.php?url=', label: '第一解析' },
-  { value: 'https://jx.zui.cm/?url=', label: '最先解析' },
-  { value: 'https://za.kuanjv.com/?url=', label: '王牌解析' },
-  { value: 'http://47.98.234.2:7768/api.php?url=', label: '293' },
-  { value: 'https://play.fuqizhishi.com/maotv/API.php?appkey=xiongdimenbieguaiwodingbuzhulegailekey07201538&url=', label: '云you秒解' }
-]
 
 // 视频源列表
 const videoSources = [
@@ -180,12 +127,18 @@ const videoSources = [
 const route = useRoute()
 const video = ref(null)
 const loading = ref(false)
-const currentUrl = ref('')
-const selectedSource = ref('tencent')
-const selectedParser = ref(DEFAULT_API_LIST[0].value)
-const parserServices = ref(DEFAULT_API_LIST)
+const loadingText = ref('加载中...')
+
+// 播放状态
 const m3u8Url = ref('')
 const hlsInstance = ref(null)
+
+// 选择的配置
+const selectedSource = ref('tencent')
+const selectedParser = ref('')
+const parserServices = ref([])
+
+// 剧集
 const currentSeason = ref(1)
 const currentEpisode = ref(1)
 
@@ -196,17 +149,6 @@ const currentEpisodes = computed(() => {
   return video.value?.seasonDetails?.episodes || []
 })
 
-const formatTime = (seconds) => {
-  if (!seconds) return '00:00'
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = Math.floor(seconds % 60)
-  if (h > 0) {
-    return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-  }
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
-
 const formatRuntime = (minutes) => {
   if (!minutes) return ''
   const h = Math.floor(minutes / 60)
@@ -214,16 +156,27 @@ const formatRuntime = (minutes) => {
   return h ? `${h}h ${m}m` : `${m}m`
 }
 
-const getSourceName = (platform) => {
-  const source = videoSources.find(s => s.value === platform)
-  return source ? source.label : platform
-}
-
 const loadData = async () => {
   loading.value = true
+  loadingText.value = '加载视频信息...'
   try {
-    const detailRes = await getVideoDetail(mediaType(), tmdbId())
+    // 并行加载视频详情和解析服务列表
+    const [detailRes, parsersRes] = await Promise.all([
+      getVideoDetail(mediaType(), tmdbId()),
+      getParsers()
+    ])
+
     video.value = detailRes.data
+
+    // 处理解析服务列表
+    if (parsersRes.data && parsersRes.data.length > 0) {
+      parserServices.value = parsersRes.data.map(p => ({
+        value: p.url,
+        label: p.name
+      }))
+      // 默认选择第一个解析服务
+      selectedParser.value = parserServices.value[0].value
+    }
 
     if (video.value?.seasons?.length) {
       currentSeason.value = video.value.seasons[0].season_number
@@ -241,7 +194,11 @@ const loadSeasonDetail = async (season) => {
     const { data } = await getSeasonDetail(tmdbId(), season)
     video.value.seasonDetails = data
     if (data.episodes?.length) {
-      currentEpisode.value = data.episodes[0].episode_number
+      // 保持当前选中的集数，如果不存在则选择第一集
+      const exists = data.episodes.some(e => e.episode_number === currentEpisode.value)
+      if (!exists) {
+        currentEpisode.value = data.episodes[0].episode_number
+      }
     }
   } catch {}
 }
@@ -249,12 +206,17 @@ const loadSeasonDetail = async (season) => {
 const selectSeason = (season) => {
   currentSeason.value = season
   loadSeasonDetail(season)
+  // 切换季时重置到第一集
+  if (video.value?.seasonDetails?.episodes?.length) {
+    currentEpisode.value = video.value.seasonDetails.episodes[0].episode_number
+  }
 }
 
 const selectEpisode = (episode) => {
   currentEpisode.value = episode
 }
 
+// 核心播放逻辑
 const handlePlay = async () => {
   if (!video.value) {
     ElMessage.warning('请先选择要播放的影片')
@@ -262,6 +224,8 @@ const handlePlay = async () => {
   }
 
   loading.value = true
+  loadingText.value = '正在搜索播放链接...'
+
   try {
     // 1. 搜索视频播放链接
     const isTv = mediaType() === 'tv'
@@ -276,21 +240,39 @@ const handlePlay = async () => {
     })
 
     const platformUrl = searchRes.data.platform_url
+    loadingText.value = '正在解析视频...'
 
-    // 2. 解析为 m3u8
+    // 2. 解析为 m3u8 或直接播放 URL
     const resolveRes = await resolveVideo({
-      platform_url: platformUrl
+      platform_url: platformUrl,
+      parser_url: selectedParser.value
     })
 
-    const m3u8 = resolveRes.data.m3u8_url
+    const url = resolveRes.data.m3u8_url
+    const parser = resolveRes.data.parser
+    console.log('[播放] 返回的 URL:', url, '解析服务:', parser)
 
-    // 3. 使用 HLS.js 播放
-    playM3u8(m3u8)
-
-    ElMessage.success('正在播放...')
+    // 3. 根据 URL 类型选择播放方式
+    if (url.includes('.m3u8')) {
+      // m3u8 URL 使用 HLS.js 播放
+      m3u8Url.value = url
+      await nextTick()
+      playM3u8(url)
+      ElMessage.success(`使用 ${parser} 播放`)
+    } else if (url.includes('.mp4')) {
+      // mp4 URL 直接用 video 标签播放
+      m3u8Url.value = url
+      await nextTick()
+      playMp4(url)
+      ElMessage.success(`使用 ${parser} 播放`)
+    } else {
+      ElMessage.error('无法解析视频地址，请尝试其他解析服务')
+      m3u8Url.value = ''
+    }
   } catch (err) {
-    const msg = err.response?.data?.detail || '播放失败'
+    const msg = err.response?.data?.detail || '播放失败，请尝试其他解析服务'
     ElMessage.error(msg)
+    m3u8Url.value = ''
   } finally {
     loading.value = false
   }
@@ -298,36 +280,97 @@ const handlePlay = async () => {
 
 const playM3u8 = (url) => {
   const videoEl = document.querySelector('.player-video')
+  if (!videoEl) return
 
   // 清理旧实例
   if (hlsInstance.value) {
     hlsInstance.value.destroy()
+    hlsInstance.value = null
   }
 
   if (Hls.isSupported()) {
-    const hls = new Hls()
+    const hls = new Hls({
+      enableWorker: true,
+      lowLatencyMode: false,
+    })
     hls.loadSource(url)
     hls.attachMedia(videoEl)
     hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      videoEl.play()
+      videoEl.play().catch(e => console.warn('自动播放失败:', e))
+    })
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      if (data.fatal) {
+        console.error('HLS 错误:', data)
+        ElMessage.error('视频播放出错')
+      }
     })
     hlsInstance.value = hls
   } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
     // Safari 原生支持 HLS
     videoEl.src = url
-    videoEl.play()
+    videoEl.play().catch(e => console.warn('自动播放失败:', e))
+  } else {
+    ElMessage.error('您的浏览器不支持 HLS 播放')
   }
 }
 
-onUnmounted(() => {
+const playMp4 = (url) => {
+  const videoEl = document.querySelector('.player-video')
+  if (!videoEl) return
+
+  videoEl.src = url
+  videoEl.play().catch(e => console.warn('自动播放失败:', e))
+}
+
+const cleanup = () => {
   if (hlsInstance.value) {
     hlsInstance.value.destroy()
+    hlsInstance.value = null
+  }
+}
+
+// 用于检测是否首次加载
+const isInitialized = ref(false)
+
+// 监听视频源变化 - 自动播放
+watch(selectedSource, (newSource, oldSource) => {
+  if (isInitialized.value && oldSource !== undefined) {
+    handlePlay()
   }
 })
 
-watch(() => route.params.id, loadData)
+// 监听解析服务变化 - 自动播放
+watch(selectedParser, (newParser, oldParser) => {
+  if (isInitialized.value && oldParser !== undefined) {
+    handlePlay()
+  }
+})
 
-onMounted(loadData)
+// 监听剧集变化 - 自动播放
+watch(currentEpisode, (newEpisode, oldEpisode) => {
+  if (isInitialized.value && oldEpisode !== undefined) {
+    handlePlay()
+  }
+})
+
+onUnmounted(cleanup)
+
+watch(() => route.params.id, (newId, oldId) => {
+  if (newId !== oldId) {
+    cleanup()
+    loadData()
+  }
+})
+
+onMounted(async () => {
+  await loadData()
+  // 数据加载完成后，标记为已初始化并触发首次播放
+  isInitialized.value = true
+  // 延迟一点触发首次播放，确保 UI 已渲染
+  setTimeout(() => {
+    handlePlay()
+  }, 500)
+})
 </script>
 
 <style scoped>
@@ -410,9 +453,15 @@ onMounted(loadData)
   height: 100%;
   background: #000;
 }
-.player-iframe {
-  width: 100%;
-  height: 100%;
+.player-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  color: #888;
+}
+.player-loading p {
+  font-size: 14px;
 }
 .player-placeholder {
   width: 100%;
@@ -468,7 +517,6 @@ onMounted(loadData)
 
 .sources-section,
 .parser-section,
-.play-section,
 .episodes-section {
   padding: 20px 24px;
   border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -523,26 +571,20 @@ onMounted(loadData)
   color: #fff;
 }
 
-/* 播放按钮 */
-.play-btn-large {
-  width: 100%;
-  padding: 16px 24px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border: none;
-  border-radius: 12px;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+/* 播放状态 */
+.play-status {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 24px;
 }
-.play-btn-large:hover:not(:disabled) {
-  transform: scale(1.02);
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-}
-.play-btn-large:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.status-tag {
+  padding: 6px 12px;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 20px;
+  font-size: 12px;
+  color: #a5b4fc;
 }
 
 /* 剧集选择 */
@@ -590,17 +632,6 @@ onMounted(loadData)
 .episode-btn.active {
   background: linear-gradient(135deg, #6366f1, #8b5cf6);
   color: #fff;
-}
-
-/* 加载状态 */
-.loading-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0,0,0,0.8);
 }
 
 /* 响应式 */

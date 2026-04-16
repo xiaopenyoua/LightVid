@@ -44,11 +44,17 @@ async def close_browser():
 
 @asynccontextmanager
 async def get_browser_page():
-    """获取浏览器页面（上下文管理器）"""
+    """获取浏览器页面（上下文管理器）- 每次创建新的隔离上下文"""
     browser = await get_browser()
-    page = await browser.new_page()
+    # 创建独立的浏览器上下文，确保请求之间完全隔离
+    context = await browser.new_context(
+        # 清除所有 cookie 和缓存
+        ignore_https_errors=True,
+    )
+    page = await context.new_page()
 
     try:
         yield page
     finally:
         await page.close()
+        await context.close()
