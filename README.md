@@ -93,7 +93,7 @@ docker-compose logs -f
 ```
 
 服务启动后：
-- 前端：http://localhost
+- 前端：http://localhost:18778
 - 后端 API：http://localhost:18668
 - 健康检查：http://localhost:18668/api/health
 
