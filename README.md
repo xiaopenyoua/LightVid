@@ -136,16 +136,3 @@ LightVid/
 ## API 文档
 
 后端启动后可访问 http://127.0.0.1:18668/docs 查看 Swagger UI API 文档。
-
-主要 API 端点：
-
-- `GET /api/sources` - 获取播放源列表
-- `POST /api/sources/crawl` - 触发爬取 TV Box 源
-- `GET /api/douban/videos` - 获取本地视频列表
-- `GET /api/douban/tmdb/search` - 搜索 TMDB
-- `POST /api/douban/crawl/{tmdb_id}` - 添加视频到本地
-- `GET /api/play/sources` - 获取播放源（按速度排序）
-- `GET /api/history` - 获取观看历史
-- `POST /api/history` - 更新播放进度
-- `GET /api/favorites` - 获取收藏列表
-- `POST /api/favorites` - 添加收藏
