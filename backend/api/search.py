@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from database import get_db
 
@@ -15,9 +15,9 @@ class VideoLinkRequest(BaseModel):
     media_type: str  # movie / tv
     platform: str  # tencent / iqiyi / youku / bilibili / mgtv
     title: str
-    year: int = None
-    season: int = None  # 剧集第几季
-    episode: int = None  # 剧集第几集
+    year: int | None = None
+    season: int | None = None  # 剧集第几季
+    episode: int | None = None  # 剧集第几集
 
 
 class VideoLinkResponse(BaseModel):
