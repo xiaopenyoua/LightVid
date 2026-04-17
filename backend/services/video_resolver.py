@@ -6,51 +6,7 @@ import re
 from typing import Optional, List, Dict, Any
 from sqlalchemy.orm import Session
 from models.parse_config import ParseConfig
-
-
-# 默认解析服务列表（备用）
-DEFAULT_PARSERS = [
-    { "url": "https://jx.xmflv.com/?url=", "name": "虾米视频解析" },
-    { "url": "https://jx.77flv.cc/?url=", "name": "七七云解析" },
-    { "url": "https://jx.playerjy.com/?url=", "name": "Player-JY" },
-    { "url": "https://jiexi.789jiexi.icu:4433/?url=", "name": "789解析" },
-    { "url": "https://jx.2s0.cn/player/?url=", "name": "极速解析" },
-    { "url": "https://bd.jx.cn/?url=", "name": "冰豆解析" },
-    { "url": "https://jx.973973.xyz/?url=", "name": "973解析" },
-    { "url": "https://www.ckplayer.vip/jiexi/?url=", "name": "CK" },
-    { "url": "https://jx.nnxv.cn/tv.php?url=", "name": "七哥解析" },
-    { "url": "https://www.yemu.xyz/?url=", "name": "夜幕" },
-    { "url": "https://www.pangujiexi.com/jiexi/?url=", "name": "盘古" },
-    { "url": "https://www.playm3u8.cn/jiexi.php?url=", "name": "playm3u8" },
-    { "url": "https://video.isyour.love/player/getplayer?url=", "name": "芒果TV1" },
-    { "url": "https://im1907.top/?jx=", "name": "芒果TV2" },
-    { "url": "https://jx.hls.one/?url=", "name": "HLS解析" },
-    { "url": "https://jx.jsonplayer.com/player/?url=", "name": "JSON解析" },
-    { "url": "https://jx.dj6u.com/?url=", "name": "DJ6U解析" },
-    { "url": "https://jx.rdhk.net/?v=", "name": "RDHK解析" },
-    { "url": "https://api.okjx.cc:3389/jx.php?url=", "name": "OKJX解析1" },
-    { "url": "https://okjx.cc/?url=", "name": "OKJX解析2" },
-    { "url": "https://jx.aidouer.net/?url=", "name": "Aidouer解析" },
-    { "url": "https://jx.iztyy.com/Bei/?url=", "name": "iztyy解析" },
-    { "url": "https://jx.yparse.com/index.php?url=", "name": "yparse解析" },
-    { "url": "https://www.mtosz.com/m3u8.php?url=", "name": "mtosz解析" },
-    { "url": "https://jx.m3u8.tv/jiexi/?url=", "name": "m3u8tv解析" },
-    { "url": "https://parse.123mingren.com/?url=", "name": "123明人解析" },
-    { "url": "https://jx.4kdv.com/?url=", "name": "4K解析" },
-    { "url": "https://ckmov.ccyjjd.com/ckmov/?url=", "name": "CK解析" },
-    { "url": "https://www.8090g.cn/?url=", "name": "8090G解析" },
-    { "url": "https://api.qianqi.net/vip/?url=", "name": "千奇解析" },
-    { "url": "https://vip.laobandq.com/jiexi.php?url=", "name": "老板解析" },
-    { "url": "https://www.administratorw.com/video.php?url=", "name": "管理员解析" },
-    { "url": "https://go.yh0523.cn/y.cy?url=", "name": "解析14" },
-    { "url": "https://jx.blbo.cc:4433/?url=", "name": "人迷解析" },
-    { "url": "http://27.124.4.42:4567/jhjson/ceshi.php?url=", "name": "第一解析" },
-    { "url": "https://jx.zui.cm/?url=", "name": "最先解析" },
-    { "url": "https://za.kuanjv.com/?url=", "name": "王牌解析" },
-    { "url": "http://47.98.234.2:7768/api.php?url=", "name": "293" },
-    { "url": "https://play.fuqizhishi.com/maotv/API.php?appkey=xiongdimenbieguaiwodingbuzhulegailekey07201538&url=", "name": "云you秒解" },
-]
-
+from crawlers.parse_config_crawler import DEFAULT_PARSERS
 
 async def resolve_video_url(
     platform_url: str,

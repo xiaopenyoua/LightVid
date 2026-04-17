@@ -12,7 +12,6 @@ from api.play import router as play_router
 from api.history import router as history_router
 from api.favorites import router as favorites_router
 from api.search import router as search_router
-from models import ParseConfig
 
 # 创建所有表
 Base.metadata.create_all(bind=engine)
@@ -45,6 +44,7 @@ async def scheduled_crawl_tvbox():
     from crawlers.tvbox_crawler import crawl_tvbox_sources
     db = SessionLocal()
     try:
+        print(f"[Scheduler] TV Box 源爬取开始...")
         count = await crawl_tvbox_sources(db)
         print(f"[Scheduler] TV Box 源爬取完成，新增 {count} 个源")
     except Exception as e:
@@ -53,50 +53,57 @@ async def scheduled_crawl_tvbox():
         db.close()
 
 
-def init_default_configs():
-    """初始化默认解析接口"""
-    from config import DEFAULT_PARSE_CONFIGS
+async def scheduled_crawl_parse_configs():
+    """定时爬取并测试解析服务"""
+    from crawlers.parse_config_crawler import crawl_and_test_parse_configs
     db = SessionLocal()
     try:
-        count = db.query(ParseConfig).count()
-        if count == 0:
-            for cfg in DEFAULT_PARSE_CONFIGS:
-                db.add(ParseConfig(**cfg))
-            db.commit()
-            print(f"[Startup] 已自动初始化 {len(DEFAULT_PARSE_CONFIGS)} 个解析接口")
-        else:
-            print(f"[Startup] 解析接口已存在 ({count} 个)，跳过初始化")
+        print(f"[Scheduler] 解析服务爬取开始...")
+        new_count, valid_count = await crawl_and_test_parse_configs(db)
+        print(f"[Scheduler] 解析服务更新完成，新增 {new_count}，有效 {valid_count}")
     except Exception as e:
-        print(f"[Startup] 初始化解析接口失败: {e}")
-        db.rollback()
+        print(f"[Scheduler] 解析服务爬取失败: {e}")
     finally:
         db.close()
 
 
 @app.on_event("startup")
 async def startup_event():
-    """启动时初始化"""
-    # 初始化默认解析接口
-    init_default_configs()
+    """启动时初始化（全部后台执行，不阻塞）"""
+    from crawlers.parse_config_crawler import init_default_parse_configs
 
-    # 初始化/同步 TMDB 数据
-    from database import SessionLocal
-    from services.sync_service import SyncService
+    async def startup_tasks():
+        """后台执行所有启动任务"""
+        # 初始化默认解析服务到数据库
+        db = SessionLocal()
+        try:
+            init_default_parse_configs(db)
+        finally:
+            db.close()
 
-    db = SessionLocal()
-    try:
-        sync = SyncService(db)
-        # 同步 Genre（阻塞式，确保启动后立即可用）
-        count = await sync.sync_genres()
-        print(f"[Startup] 已同步 {count} 个 Genre")
+        # 初始化/同步 TMDB 数据
+        from services.sync_service import SyncService
 
-        # 异步同步列表（后台进行）
-        asyncio.create_task(sync.sync_trending())
-        asyncio.create_task(sync.sync_popular())
-        asyncio.create_task(sync.sync_top_rated())
-        asyncio.create_task(sync.sync_upcoming())
-    finally:
-        db.close()
+        db = SessionLocal()
+        try:
+            sync = SyncService(db)
+            # 同步 Genre
+            count = await sync.sync_genres()
+            print(f"[Startup] 已同步 {count} 个 Genre")
+
+            # 异步同步列表（后台进行）
+            asyncio.create_task(sync.sync_trending())
+            asyncio.create_task(sync.sync_popular())
+            asyncio.create_task(sync.sync_top_rated())
+            asyncio.create_task(sync.sync_upcoming())
+        finally:
+            db.close()
+
+        # 启动时立即执行一次解析服务爬取
+        print("[Scheduler] 立即执行首次解析服务爬取任务...")
+        await scheduled_crawl_parse_configs()
+        print("[Scheduler] 立即执行首次 TV Box 源爬取任务...")
+        await scheduled_crawl_tvbox()
 
     # 启动定时任务 - 每6小时爬取TV Box源
     scheduler.add_job(
@@ -106,12 +113,21 @@ async def startup_event():
         name="定时爬取 TV Box 源",
         replace_existing=True
     )
-    scheduler.start()
-    print("[Scheduler] 定时任务已启动 (TV Box 源爬取: 每6小时)")
 
-    # 启动时立即执行一次爬取
-    print("[Scheduler] 立即执行首次爬取任务...")
-    asyncio.create_task(scheduled_crawl_tvbox())
+    # 启动定时任务 - 每1小时爬取并测试解析服务
+    scheduler.add_job(
+        scheduled_crawl_parse_configs,
+        trigger=IntervalTrigger(hours=1),
+        id="crawl_parse_configs",
+        name="定时爬取并测试解析服务",
+        replace_existing=True
+    )
+
+    scheduler.start()
+    print("[Scheduler] 定时任务已启动 (TV Box 源爬取: 每6小时, 解析服务: 每1小时)")
+
+    # 所有启动任务后台执行，不阻塞 uvicorn 启动
+    asyncio.create_task(startup_tasks())
 
 
 @app.on_event("shutdown")
