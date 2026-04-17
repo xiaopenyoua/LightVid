@@ -16,6 +16,9 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"数据库错误: {str(e)}")
