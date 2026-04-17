@@ -1,9 +1,9 @@
 <template>
   <div class="video-detail">
     <!-- 背景层 -->
-    <div class="backdrop-container" v-if="video?.backdrop_url || video?.poster_url">
+    <div class="backdrop-container" v-if="currentBackdrop">
       <img
-        :src="video.backdrop_url || video.poster_url"
+        :src="currentBackdrop"
         class="backdrop-image"
         :class="{ loaded: backdropLoaded }"
         @load="backdropLoaded = true"
@@ -55,11 +55,17 @@
 
         <!-- 剧集选择器 -->
         <div class="episode-selector" v-if="video.seasons?.length">
-          <select v-model="currentSeason" class="season-select" @change="onSeasonChange">
-            <option v-for="season in video.seasons" :key="season.season_number" :value="season.season_number">
+          <div class="season-tabs">
+            <button
+              v-for="season in video.seasons"
+              :key="season.season_number"
+              class="season-tab"
+              :class="{ active: currentSeason === season.season_number }"
+              @click="selectSeason(season.season_number)"
+            >
               {{ season.name }}
-            </option>
-          </select>
+            </button>
+          </div>
           <div class="episode-grid" v-if="currentEpisodes.length">
             <button
               v-for="episode in currentEpisodes"
@@ -109,6 +115,7 @@ const isFavorite = ref(false)
 const currentSeason = ref(1)
 const currentEpisode = ref(1)
 const backdropLoaded = ref(false)
+const currentBackdrop = ref('')
 
 const mediaType = () => route.params.media_type || 'movie'
 const tmdbId = () => parseInt(route.params.id)
@@ -125,11 +132,23 @@ const formatRuntime = (minutes) => {
   return h ? `${h}h ${m}m` : `${m}m`
 }
 
+const currentSeasonPoster = computed(() => {
+  if (!video.value?.seasons) return null
+  const season = video.value.seasons.find(s => s.season_number === currentSeason.value)
+  return season?.poster_url || null
+})
+
+const updateBackdrop = () => {
+  backdropLoaded.value = false
+  currentBackdrop.value = currentSeasonPoster.value || video.value?.backdrop_url || video.value?.poster_url || ''
+}
+
 const loadDetail = async () => {
   loading.value = true
   try {
     const { data } = await getVideoDetail(mediaType(), tmdbId())
     video.value = data
+    updateBackdrop()
     if (video.value?.seasons?.length) {
       currentSeason.value = video.value.seasons[0].season_number
       await loadSeasonDetail(currentSeason.value)
@@ -157,9 +176,11 @@ const loadSeasonDetail = async (season) => {
   } catch {}
 }
 
-const onSeasonChange = () => {
-  loadSeasonDetail(currentSeason.value)
-  router.replace({ query: { ...route.query, season: currentSeason.value } })
+const selectSeason = (season) => {
+  currentSeason.value = season
+  updateBackdrop()
+  loadSeasonDetail(season)
+  router.replace({ query: { ...route.query, season } })
 }
 
 const selectEpisode = (episode) => {
@@ -275,7 +296,7 @@ onMounted(loadDetail)
 
 /* 信息面板 */
 .info-panel {
-  max-width: 500px;
+  max-width: 40vw;
 }
 
 /* 标题 */
@@ -360,25 +381,34 @@ onMounted(loadDetail)
 .episode-selector {
   margin-top: 20px;
 }
-.season-select {
-  width: 100%;
-  max-width: 200px;
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  color: #fff;
-  font-size: 14px;
+.season-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 12px;
-  cursor: pointer;
 }
-.season-select option {
-  background: #1a1a2e;
+.season-tab {
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #ccc;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.season-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.season-tab.active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: transparent;
   color: #fff;
 }
 .episode-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 8px;
 }
 .episode-btn {
