@@ -4,7 +4,13 @@
     <nav class="nav">
       <router-link to="/" class="nav-logo">轻影</router-link>
       <div class="nav-actions">
-        <input type="text" class="nav-search" placeholder="搜索电影、剧集...">
+        <input
+          type="text"
+          class="nav-search"
+          placeholder="搜索电影、剧集..."
+          v-model="searchKeyword"
+          @keyup.enter="goSearch"
+        >
         <button class="nav-btn">👤</button>
       </div>
     </nav>
@@ -115,6 +121,7 @@ import FilmGrid from '../components/FilmGrid.vue'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 
 const router = useRouter()
+const searchKeyword = ref('')
 const loading = ref(false)
 const homeData = ref(null)
 const genreData = ref({ movie: [], tv: [] })
@@ -300,6 +307,12 @@ const handleFavorite = async (item) => {
     ElMessage.success('收藏成功')
   } catch {
     ElMessage.error('收藏失败')
+  }
+}
+
+const goSearch = () => {
+  if (searchKeyword.value.trim()) {
+    router.push(`/search?q=${encodeURIComponent(searchKeyword.value.trim())}`)
   }
 }
 
