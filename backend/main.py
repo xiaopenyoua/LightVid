@@ -114,17 +114,17 @@ async def startup_event():
         replace_existing=True
     )
 
-    # 启动定时任务 - 每1小时爬取并测试解析服务
+    # 启动定时任务 - 每10小时爬取并测试解析服务
     scheduler.add_job(
         scheduled_crawl_parse_configs,
-        trigger=IntervalTrigger(hours=1),
+        trigger=IntervalTrigger(hours=10),
         id="crawl_parse_configs",
         name="定时爬取并测试解析服务",
         replace_existing=True
     )
 
     scheduler.start()
-    print("[Scheduler] 定时任务已启动 (TV Box 源爬取: 每6小时, 解析服务: 每1小时)")
+    print("[Scheduler] 定时任务已启动 (TV Box 源爬取: 每6小时, 解析服务: 每10小时)")
 
     # 所有启动任务后台执行，不阻塞 uvicorn 启动
     asyncio.create_task(startup_tasks())

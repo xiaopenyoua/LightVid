@@ -83,6 +83,7 @@ PARSE_SOURCES = {
     # GreasyFork用户脚本 - 从脚本源码提取URL
     "greasyfork_scripts": [
         "https://greasyfork.org/en/scripts/541885-主流视频网vip视频解析助手/code",
+        "https://greasyfork.org/en/scripts/31191-vip-video-cracker-vip%E8%A7%86%E9%A2%91%E8%A7%A3%E6%9E%90/code",
     ],
 
     # GitHub仓库/文件 - 读取仓库中的解析服务列表
@@ -611,22 +612,100 @@ def guess_parse_name(url: str) -> str:
     return parsed[:30] if len(parsed) > 30 else parsed
 
 
+async def test_parse_config_browser(url: str, timeout: float = 30.0) -> Tuple[bool, float, str]:
+    """
+    使用 Playwright 浏览器测试解析服务是否可用（真实场景模拟）
+
+    模拟实际使用场景：
+    1. 使用浏览器访问解析服务（支持 SPA JavaScript 渲染）
+    2. 拦截网络请求，检查是否拦截到 .m3u8 或 .mp4 视频请求
+    3. 记录响应时间
+
+    Args:
+        url: 解析服务完整 URL
+        timeout: 超时时间（秒）
+
+    Returns:
+        (是否可用, 响应时间秒, 拦截到的视频URL)。不可用时响应时间为 0.0，视频URL为空
+    """
+    from services.browser_pool import get_browser_page
+    import time as time_module
+
+    video_url_found = None
+    url_pattern = re.compile(r'\.(m3u8|mp4)(\?|$)', re.IGNORECASE)
+
+    start_time = time_module.monotonic()
+
+    try:
+        async with get_browser_page() as page:
+            # 设置网络请求拦截
+            def handle_request(request):
+                nonlocal video_url_found
+                request_url = request.url
+                if url_pattern.search(request_url) and video_url_found is None:
+                    video_url_found = request_url
+
+            page.on("request", handle_request)
+
+            # 访问解析服务
+            try:
+                await page.goto(url, wait_until="networkidle", timeout=timeout * 1000)
+            except Exception as e:
+                # networkidle 超时，继续检查已有的请求
+                pass
+
+            # 额外等待一段时间确保视频请求被捕获
+            for _ in range(6):
+                if video_url_found:
+                    break
+                await page.wait_for_timeout(500)
+
+            # 如果还没找到，尝试检查 video 标签
+            if not video_url_found:
+                video_src = await page.evaluate("""
+                    () => {
+                        const video = document.querySelector('video');
+                        if (video && video.src && (video.src.includes('.m3u8') || video.src.includes('.mp4'))) {
+                            return video.src;
+                        }
+                        return null;
+                    }
+                """)
+                if video_src and not video_src.startswith('blob:'):
+                    video_url_found = video_src
+
+            elapsed = time_module.monotonic() - start_time
+
+            if video_url_found:
+                return True, round(elapsed, 2), video_url_found[:100]
+            else:
+                return False, round(elapsed, 2), ""
+
+    except Exception as e:
+        elapsed = time_module.monotonic() - start_time
+        return False, round(elapsed, 2), ""
+
+
 async def test_parse_config(url: str, timeout: float = 10.0) -> Tuple[bool, float]:
     """
-    测试解析服务是否可用，并记录响应时间
+    测试解析服务是否可用，并记录响应时间（快速HTTP预筛选）
 
-    使用多个测试视频 URL 测试，只检查响应状态和速度，
-    不验证返回内容是否包含 m3u8/mp4（因为解析服务多为 SPA，HTTP 请求无法验证）
+    作为预筛选，快速过滤明显无效的解析服务（如连接超时、证书错误等）。
+    真正的可用性测试需要使用 test_parse_config_browser()。
 
     Returns:
         (是否可用, 响应时间秒)。不可用时响应时间为 0.0
     """
     import time
 
+    # 第一级 httpx 预筛选测试用的多个测试视频URL
+    # 会轮流尝试每个视频URL，只要有一个返回200且内容>=500字节就认为通过
+    # 使用多个URL是为了提高测试的容错性（某些视频可能对特定解析服务效果更好）
     test_video_urls = [
         "https://v.qq.com/x/cover/mzc00200x8gfhok/m4100c4yead.html",
         "https://v.qq.com/x/cover/3q0jq9kvr9wvk2x/d4100mokka3.html",
         "https://v.qq.com/x/cover/mzc002006dzzunf/x4102wrphge.html",
+        "https://v.youku.com/v_show/id_XNjUxMjc2NDgwNA==.html",
     ]
 
     def build_url(base: str, video: str) -> str:
@@ -655,6 +734,18 @@ async def test_parse_config(url: str, timeout: float = 10.0) -> Tuple[bool, floa
     return False, 0.0
 
 
+def build_parse_url(base_url: str, video_url: str) -> str:
+    """构建完整的解析服务 URL"""
+    if "?url=http" in base_url or "?url=https" in base_url:
+        return base_url.replace("?url=", f"?url={video_url}")
+    elif "?jx=" in base_url:
+        return base_url.replace("?jx=", f"?jx={video_url}")
+    elif "?v=" in base_url:
+        return base_url.replace("?v=", f"?v={video_url}")
+    else:
+        return base_url + video_url
+
+
 def init_default_parse_configs(db: Session) -> int:
     """初始化默认解析服务到数据库（全覆盖）"""
     # 清空现有解析服务
@@ -679,16 +770,22 @@ def init_default_parse_configs(db: Session) -> int:
 
 async def crawl_and_test_parse_configs(db: Session) -> Tuple[int, int]:
     """
-    统一的解析服务更新任务：
+    统一的解析服务更新任务（两级测试策略）：
     1. 从互联网爬取新的解析服务
     2. 与 DEFAULT_PARSERS 合并去重（url 相同算相同）
-    3. 测试所有解析服务
-    4. 只保留测试通过的解析服务（全覆盖）
+    3. 第一级：httpx 并发快速过滤，淘汰明显无效的
+    4. 第二级：Playwright 并发深度测试，验证真正的视频解析能力
+    5. 只保留测试通过的解析服务（全覆盖）
 
     Returns:
         (爬取数量, 保留数量)
     """
     print("[ParseConfig Crawler] 开始爬取和测试解析服务...")
+
+    # 第二级 Playwright 浏览器深度测试用的测试视频URL
+    # 拼接成完整的解析服务测试URL，如：https://jx.xmflv.com/?url=https://v.qq.com/x/cover/mzc00200x8gfhok/m4100c4yead.html
+    # 只使用一个URL，因为浏览器测试很慢，没必要测多个
+    test_video_url = "https://v.qq.com/x/cover/mzc00200x8gfhok/m4100c4yead.html"
 
     # 1. 从互联网爬取解析服务
     discovered = await fetch_parse_sources()
@@ -703,23 +800,67 @@ async def crawl_and_test_parse_configs(db: Session) -> Tuple[int, int]:
         if url not in all_parsers:
             all_parsers[url] = item["name"]
 
-    print(f"[ParseConfig Crawler] 去重后共 {len(all_parsers)} 个解析服务待测试")
+    print(f"[ParseConfig Crawler] 去重后共 {len(all_parsers)} 个解析服务")
 
-    # 3. 测试所有解析服务（并发提升速度）
-    async def test_one(url: str, name: str):
+    # ============================================
+    # 第一级：httpx 并发快速过滤（快速淘汰无效的）
+    # ============================================
+    print(f"[ParseConfig Crawler] 第一级：httpx 并发快速过滤...")
+
+    async def http_test_one(url: str, name: str):
         available, elapsed = await test_parse_config(url)
         return name, url, available, elapsed
 
-    tasks = [test_one(url, name) for url, name in all_parsers.items()]
-    results = await asyncio.gather(*tasks)
+    http_tasks = [http_test_one(url, name) for url, name in all_parsers.items()]
+    http_results = await asyncio.gather(*http_tasks)
+
+    passed_http = []
+    for name, url, available, elapsed in http_results:
+        if available:
+            passed_http.append((name, url, elapsed))
+            print(f"[ParseConfig Crawler] ✓ HTTP通过: {name} ({elapsed}s)")
+        else:
+            print(f"[ParseConfig Crawler] ✗ HTTP失败: {name}")
+
+    print(f"[ParseConfig Crawler] 第一级通过: {len(passed_http)}/{len(all_parsers)}")
+
+    # 如果第一级全挂了，直接返回
+    if not passed_http:
+        print("[ParseConfig Crawler] 没有解析服务通过第一级测试")
+        db.query(ParseConfig).delete()
+        db.commit()
+        return len(discovered), 0
+
+    # ============================================
+    # 第二级：Playwright 并发深度测试（信号量控制并发）
+    # ============================================
+    print(f"[ParseConfig Crawler] 第二级：Playwright 并发深度测试（最多3个并发）...")
+
+    # 使用信号量限制并发数量（避免浏览器资源耗尽）
+    semaphore = asyncio.Semaphore(3)
+
+    async def browser_test_one(name: str, url: str, index: int, total: int):
+        """单个浏览器测试任务"""
+        async with semaphore:
+            print(f"[ParseConfig Crawler] [{index}/{total}] 开始测试: {name}")
+            full_url = build_parse_url(url, test_video_url)
+            available, elapsed, video_url = await test_parse_config_browser(full_url, timeout=30.0)
+            print(f"[ParseConfig Crawler] [{index}/{total}] 完成: {name} - {'✓' if available else '✗'}")
+            return name, url, available, elapsed, video_url
+
+    browser_tasks = [
+        browser_test_one(name, url, i + 1, len(passed_http))
+        for i, (name, url, _) in enumerate(passed_http)
+    ]
+    browser_results = await asyncio.gather(*browser_tasks)
 
     valid_parsers = []
-    for name, url, available, elapsed in results:
+    for name, url, available, elapsed, video_url in browser_results:
         if available:
-            valid_parsers.append({"name": name, "url": url, "elapsed": elapsed})
-            print(f"[ParseConfig Crawler] ✓ {name} 可用 ({elapsed}s)")
+            valid_parsers.append({"name": name, "url": url, "elapsed": elapsed, "video_url": video_url})
+            print(f"[ParseConfig Crawler] ✓ 浏览器通过: {name} ({elapsed}s) - {video_url[:60]}...")
         else:
-            print(f"[ParseConfig Crawler] ✗ {name} 不可用")
+            print(f"[ParseConfig Crawler] ✗ 浏览器失败: {name}")
 
     # 4. 清空数据库并保存测试通过的解析服务（全覆盖），按响应时间排序
     db.query(ParseConfig).delete()

@@ -1,5 +1,7 @@
 """
 浏览器池管理 - 使用 Playwright 管理浏览器实例复用
+
+注意：并发控制由调用方负责，这里只管理浏览器实例的生命周期
 """
 import asyncio
 from typing import Optional
@@ -44,7 +46,10 @@ async def close_browser():
 
 @asynccontextmanager
 async def get_browser_page():
-    """获取浏览器页面（上下文管理器）- 每次创建新的隔离上下文"""
+    """获取浏览器页面（上下文管理器）- 每次创建新的隔离上下文
+
+    并发控制由调用方负责，使用统一的信号量限制并发数
+    """
     browser = await get_browser()
     # 创建独立的浏览器上下文，确保请求之间完全隔离
     context = await browser.new_context(
