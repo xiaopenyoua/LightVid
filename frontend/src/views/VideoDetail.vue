@@ -112,8 +112,8 @@ const router = useRouter()
 const video = ref(null)
 const loading = ref(false)
 const isFavorite = ref(false)
-const currentSeason = ref(1)
-const currentEpisode = ref(1)
+const currentSeason = ref(route.query.season ? parseInt(route.query.season) : 1)
+const currentEpisode = ref(route.query.episode ? parseInt(route.query.episode) : 1)
 const backdropLoaded = ref(false)
 const currentBackdrop = ref('')
 
@@ -150,7 +150,12 @@ const loadDetail = async () => {
     video.value = data
     updateBackdrop()
     if (video.value?.seasons?.length) {
-      currentSeason.value = video.value.seasons[0].season_number
+      const seasonFromQuery = route.query.season ? parseInt(route.query.season) : null
+      if (seasonFromQuery && video.value.seasons.some(s => s.season_number === seasonFromQuery)) {
+        currentSeason.value = seasonFromQuery
+      } else {
+        currentSeason.value = video.value.seasons[0].season_number
+      }
       await loadSeasonDetail(currentSeason.value)
     }
     try {
@@ -171,7 +176,10 @@ const loadSeasonDetail = async (season) => {
     const { data } = await getSeasonDetail(tmdbId(), season)
     video.value.seasonDetails = data
     if (data.episodes?.length) {
-      currentEpisode.value = data.episodes[0].episode_number
+      const exists = data.episodes.some(e => e.episode_number === currentEpisode.value)
+      if (!exists) {
+        currentEpisode.value = data.episodes[0].episode_number
+      }
     }
   } catch {}
 }

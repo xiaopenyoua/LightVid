@@ -138,9 +138,9 @@ const selectedSource = ref('tencent')
 const selectedParser = ref('')
 const parserServices = ref([])
 
-// 剧集
-const currentSeason = ref(1)
-const currentEpisode = ref(1)
+// 剧集 - 从 URL query 参数初始化，支持直接通过链接进入指定剧集
+const currentSeason = ref(route.query.season ? parseInt(route.query.season) : 1)
+const currentEpisode = ref(route.query.episode ? parseInt(route.query.episode) : 1)
 
 const mediaType = () => route.params.media_type || 'movie'
 const tmdbId = () => parseInt(route.params.id)
@@ -179,7 +179,13 @@ const loadData = async () => {
     }
 
     if (video.value?.seasons?.length) {
-      currentSeason.value = video.value.seasons[0].season_number
+      // 只有当 URL 没有指定 season 参数时才使用默认的第一季
+      const seasonFromQuery = route.query.season ? parseInt(route.query.season) : null
+      if (seasonFromQuery && video.value.seasons.some(s => s.season_number === seasonFromQuery)) {
+        currentSeason.value = seasonFromQuery
+      } else {
+        currentSeason.value = video.value.seasons[0].season_number
+      }
       await loadSeasonDetail(currentSeason.value)
     }
   } catch {
