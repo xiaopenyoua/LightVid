@@ -3,8 +3,9 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from database import get_db
 
-from services.video_searcher import search_video_link, get_all_platforms
+from services.video_searcher import search_video_link, get_all_platforms, continue_precache
 from services.video_resolver import resolve_with_fallback, resolve_with_browser_fallback, get_parser_list, resolve_video_url
+from models.video_platform_link import VideoPlatformLink
 
 router = APIRouter(prefix="/api/search", tags=["search"])
 
@@ -18,6 +19,7 @@ class VideoLinkRequest(BaseModel):
     year: int | None = None
     season: int | None = None  # 剧集第几季
     episode: int | None = None  # 剧集第几集
+    seasons_episodes: dict[int, int] | None = None  # {season_num: episode_count, ...} 用于预缓存
 
 
 class VideoLinkResponse(BaseModel):
@@ -37,6 +39,7 @@ async def get_video_link(request: VideoLinkRequest, db: Session = Depends(get_db
     2. HTTP 模式搜索
     3. 存入缓存
     4. 返回播放页面 URL
+    5. 后台触发预缓存其他集数
     """
     # 验证平台
     if request.platform not in get_all_platforms():
@@ -120,6 +123,86 @@ async def get_platforms():
     获取支持的视频平台列表
     """
     return [{"name": p, "label": get_platform_label(p)} for p in get_all_platforms()]
+
+
+class ClearCacheRequest(BaseModel):
+    """清除缓存请求"""
+    tmdb_id: int
+    platform: str
+    season: int | None = None  # 可选，只清除某一季
+
+
+class ClearCacheResponse(BaseModel):
+    """清除缓存响应"""
+    deleted_count: int
+    message: str
+
+
+@router.delete("/cache", response_model=ClearCacheResponse)
+async def clear_video_cache(request: ClearCacheRequest, db: Session = Depends(get_db)):
+    """
+    清除视频链接缓存
+
+    清除指定 tmdb_id 和 platform 的缓存记录
+    清除后该剧集的缓存会被标记为待重新解析
+    """
+    query = db.query(VideoPlatformLink).filter(
+        VideoPlatformLink.tmdb_id == request.tmdb_id,
+        VideoPlatformLink.platform == request.platform,
+    )
+
+    if request.season is not None:
+        query = query.filter(VideoPlatformLink.season == request.season)
+
+    # 先删除记录
+    deleted_count = query.delete()
+    db.commit()
+
+    return ClearCacheResponse(
+        deleted_count=deleted_count,
+        message=f"已清除 {deleted_count} 条缓存记录"
+    )
+
+
+class ContinuePrecacheRequest(BaseModel):
+    """触发预缓存请求"""
+    tmdb_id: int
+    platform: str
+    title: str
+    year: int | None = None
+    current_season: int | None = None
+    current_episode: int | None = None
+    seasons_episodes: dict[int, int] | None = None  # {season_num: episode_count, ...}
+
+
+class ContinuePrecacheResponse(BaseModel):
+    """继续预缓存响应"""
+    status: str
+    message: str
+
+
+@router.post("/continue-precache", response_model=ContinuePrecacheResponse)
+async def trigger_continue_precache(request: ContinuePrecacheRequest, db: Session = Depends(get_db)):
+    """
+    触发预缓存任务
+
+    当用户进入播放页时，后台预缓存所有剧集的 URL
+    """
+    result = await continue_precache(
+        db=db,
+        tmdb_id=request.tmdb_id,
+        platform=request.platform,
+        title=request.title,
+        year=request.year,
+        current_season=request.current_season,
+        current_episode=request.current_episode,
+        seasons_episodes=request.seasons_episodes,
+    )
+
+    return ContinuePrecacheResponse(
+        status=result["status"],
+        message=result["message"]
+    )
 
 
 def get_platform_label(platform: str) -> str:

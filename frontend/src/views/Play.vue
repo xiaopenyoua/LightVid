@@ -111,7 +111,7 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { getVideoDetail, getSeasonDetail } from '../api'
-import { searchVideoLink, resolveVideo, getParsers } from '../api/search'
+import { searchVideoLink, resolveVideo, getParsers, continuePrecache } from '../api/search'
 import Hls from 'hls.js'
 import LoadingSpinner from '../components/LoadingSpinner.vue'
 
@@ -187,6 +187,25 @@ const loadData = async () => {
         currentSeason.value = video.value.seasons[0].season_number
       }
       await loadSeasonDetail(currentSeason.value)
+
+      // 构建每季集数字典
+      const seasonsEpisodesData = {}
+      for (const s of video.value.seasons) {
+        if (s.season_number && s.episode_count) {
+          seasonsEpisodesData[s.season_number] = s.episode_count
+        }
+      }
+
+      // 继续预缓存未完成的集数（如果之前有中断）
+      continuePrecache({
+        tmdb_id: tmdbId(),
+        platform: selectedSource.value,
+        title: video.value.title,
+        year: video.value.release_date ? parseInt(video.value.release_date.slice(0, 4)) : null,
+        current_season: currentSeason.value,
+        current_episode: currentEpisode.value,
+        seasons_episodes: seasonsEpisodesData
+      }).catch(e => console.warn('[预缓存] 继续预缓存失败:', e))
     }
   } catch {
     ElMessage.error('加载失败')
@@ -235,6 +254,7 @@ const handlePlay = async () => {
   try {
     // 1. 搜索视频播放链接
     const isTv = mediaType() === 'tv'
+
     const searchRes = await searchVideoLink({
       tmdb_id: video.value.tmdb_id || parseInt(route.params.id),
       media_type: mediaType(),

@@ -31,3 +31,17 @@ export function searchVideoLink(params) {
 export function resolveVideo(params) {
     return api.post('/search/resolve', params)
 }
+
+/**
+ * 清除视频链接缓存
+ */
+export function clearVideoCache(params) {
+    return api.delete('/search/cache', { data: params })
+}
+
+/**
+ * 继续预缓存未完成的集数
+ */
+export function continuePrecache(params) {
+    return api.post('/search/continue-precache', params)
+}

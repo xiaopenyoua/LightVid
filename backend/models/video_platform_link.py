@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
 from datetime import datetime
 from database import Base
 
@@ -18,3 +18,8 @@ class VideoPlatformLink(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     expires_at = Column(DateTime, nullable=True)  # 缓存过期时间
+
+    # 预缓存状态字段
+    is_precached = Column(Boolean, default=False)  # 是否已预缓存（至少尝试过一次）
+    precache_status = Column(String, default="pending")  # pending / in_progress / completed / failed
+    error_message = Column(Text, nullable=True)  # 预缓存失败时的错误信息
