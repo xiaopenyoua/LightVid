@@ -74,6 +74,26 @@ async def startup_event():
     """启动时初始化（全部后台执行，不阻塞）"""
     from crawlers.parse_config_crawler import init_default_parse_configs
 
+    # 迁移：添加新的测速字段到 parse_configs 表
+    try:
+        from sqlalchemy import text
+        with engine.connect() as conn:
+            # 检查 latency1 列是否存在
+            result = conn.execute(text("PRAGMA table_info(parse_configs)"))
+            columns = [row[1] for row in result.fetchall()]
+            if 'latency1' not in columns:
+                conn.execute(text("ALTER TABLE parse_configs ADD COLUMN latency1 FLOAT"))
+                conn.execute(text("ALTER TABLE parse_configs ADD COLUMN latency2 FLOAT"))
+                conn.execute(text("ALTER TABLE parse_configs ADD COLUMN testing INTEGER DEFAULT 0"))
+                conn.commit()
+                print("[Migration] 已添加 latency1, latency2, testing 列到 parse_configs 表")
+            elif 'testing' not in columns:
+                conn.execute(text("ALTER TABLE parse_configs ADD COLUMN testing INTEGER DEFAULT 0"))
+                conn.commit()
+                print("[Migration] 已添加 testing 列到 parse_configs 表")
+    except Exception as e:
+        print(f"[Migration] 迁移检查失败: {e}")
+
     async def startup_tasks():
         """后台执行所有启动任务"""
         # 初始化默认解析服务到数据库

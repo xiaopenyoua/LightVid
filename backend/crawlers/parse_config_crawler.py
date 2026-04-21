@@ -817,7 +817,7 @@ async def crawl_and_test_parse_configs(db: Session) -> Tuple[int, int]:
     passed_http = []
     for name, url, available, elapsed in http_results:
         if available:
-            passed_http.append((name, url, elapsed))
+            passed_http.append((name, url, elapsed))  # (name, url, latency1)
             print(f"[ParseConfig Crawler] ✓ HTTP通过: {name} ({elapsed}s)")
         else:
             print(f"[ParseConfig Crawler] ✗ HTTP失败: {name}")
@@ -836,42 +836,60 @@ async def crawl_and_test_parse_configs(db: Session) -> Tuple[int, int]:
     # ============================================
     print(f"[ParseConfig Crawler] 第二级：Playwright 并发深度测试（最多3个并发）...")
 
+    from services.speed_tester import run_speed_test
+
     # 使用信号量限制并发数量（避免浏览器资源耗尽）
     semaphore = asyncio.Semaphore(3)
 
-    async def browser_test_one(name: str, url: str, index: int, total: int):
+    async def browser_test_one(name: str, url: str, latency1: float, index: int, total: int):
         """单个浏览器测试任务"""
         async with semaphore:
             print(f"[ParseConfig Crawler] [{index}/{total}] 开始测试: {name}")
-            full_url = build_parse_url(url, test_video_url)
-            available, elapsed, video_url = await test_parse_config_browser(full_url, timeout=30.0)
+
+            # 使用统一的测速模块
+            latency2 = None
+            try:
+                _, latency2 = await run_speed_test(url, test_video_url)
+                available = latency2 is not None
+            except Exception as e:
+                print(f"[ParseConfig Crawler] [{index}/{total}] {name} 测试异常: {e}")
+                available = False
+
             print(f"[ParseConfig Crawler] [{index}/{total}] 完成: {name} - {'✓' if available else '✗'}")
-            return name, url, available, elapsed, video_url
+
+            return name, url, latency1, latency2, available
 
     browser_tasks = [
-        browser_test_one(name, url, i + 1, len(passed_http))
-        for i, (name, url, _) in enumerate(passed_http)
+        browser_test_one(name, url, latency1, i + 1, len(passed_http))
+        for i, (name, url, latency1) in enumerate(passed_http)
     ]
     browser_results = await asyncio.gather(*browser_tasks)
 
     valid_parsers = []
-    for name, url, available, elapsed, video_url in browser_results:
+    for name, url, latency1, latency2, available in browser_results:
         if available:
-            valid_parsers.append({"name": name, "url": url, "elapsed": elapsed, "video_url": video_url})
-            print(f"[ParseConfig Crawler] ✓ 浏览器通过: {name} ({elapsed}s) - {video_url[:60]}...")
+            valid_parsers.append({
+                "name": name,
+                "url": url,
+                "latency1": latency1,
+                "latency2": latency2,
+            })
+            print(f"[ParseConfig Crawler] ✓ 浏览器通过: {name} (httpx: {latency1}s, browser: {latency2}s)")
         else:
             print(f"[ParseConfig Crawler] ✗ 浏览器失败: {name}")
 
-    # 4. 清空数据库并保存测试通过的解析服务（全覆盖），按响应时间排序
+    # 4. 清空数据库并保存测试通过的解析服务（全覆盖），按总延迟排序
     db.query(ParseConfig).delete()
-    # 按响应时间升序排列（快的在前）
-    valid_parsers.sort(key=lambda x: x["elapsed"])
+    # 按总延迟升序排列（快的在前）
+    valid_parsers.sort(key=lambda x: (x["latency1"] or 999) + (x["latency2"] or 999))
     for parser in valid_parsers:
         config = ParseConfig(
             name=parser["name"],
             base_url=parser["url"],
-            priority=int(parser["elapsed"] * 1000),  # 毫秒作为优先级，快的优先
-            status="active"
+            priority=int((parser["latency1"] or 0) * 1000 + (parser["latency2"] or 0) * 1000),
+            status="active",
+            latency1=parser["latency1"],
+            latency2=parser["latency2"]
         )
         db.add(config)
 

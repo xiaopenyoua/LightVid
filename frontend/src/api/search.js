@@ -49,3 +49,7 @@ export function clearVideoCache(params) {
 export function continuePrecache(params) {
     return api.post('/search/continue-precache', params)
 }
+// ============ Parse Configs API（测速扩展）============
+
+export const speedTestParser = (id) => api.post(`/parse-configs/speed-test/${id}`)
+export const speedTestAllParsers = () => api.post('/parse-configs/speed-test-all')
