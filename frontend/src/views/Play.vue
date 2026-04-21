@@ -478,7 +478,7 @@ const startControlsHideTimer = () => {
     if (!videoPaused.value) {
       showControls.value = false
     }
-  }, 1000)
+  }, 350)
 }
 
 // ==================== 加载数据 ====================
