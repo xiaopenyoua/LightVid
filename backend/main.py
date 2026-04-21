@@ -12,6 +12,7 @@ from api.play import router as play_router
 from api.history import router as history_router
 from api.favorites import router as favorites_router
 from api.search import router as search_router
+from api.progress import router as progress_router
 
 # 创建所有表
 Base.metadata.create_all(bind=engine)
@@ -35,6 +36,7 @@ app.include_router(play_router)
 app.include_router(history_router)
 app.include_router(favorites_router)
 app.include_router(search_router)
+app.include_router(progress_router)
 
 scheduler = AsyncIOScheduler()
 
