@@ -7,33 +7,33 @@
 
     <div class="page-content">
       <LoadingSpinner v-if="loading" :size="50" class="loading-center" />
-      <div v-else-if="history.length" class="history-list">
+      <div v-else-if="history.length" class="history-grid">
         <div
           v-for="item in history"
           :key="`${item.tmdb_id}-${item.season || 0}`"
           class="history-item"
         >
-          <div class="item-main" @click="handleResume(item)">
-            <img :src="item.poster_url || posterPlaceholder" class="poster" />
-            <div class="info">
-              <h3>{{ item.title }}</h3>
-              <p class="subtitle" v-if="item.season">
-                第{{ item.season }}季
-              </p>
+          <div class="item-poster" @click="handleResume(item)">
+            <img :src="item.poster_url || posterPlaceholder" :alt="item.title" />
+            <div class="play-overlay">
+              <div class="play-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+              </div>
+            </div>
+            <div class="progress-indicator">
               <div class="progress-bar">
                 <div class="progress-fill" :style="{ width: getProgress(item) + '%' }"></div>
               </div>
-              <span class="progress-text">{{ formatProgress(item) }}</span>
             </div>
           </div>
-          <div class="item-actions">
-            <button class="action-btn play" @click="handleResume(item)" title="继续播放">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            </button>
-            <button class="action-btn delete" @click="handleDelete(item)" title="删除">
-              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-            </button>
+          <div class="item-info">
+            <h3>{{ item.title }}</h3>
+            <span class="subtitle" v-if="item.season">第{{ item.season }}季</span>
+            <span class="subtitle" v-else>电影</span>
           </div>
+          <button class="delete-btn" @click="handleDelete(item)" title="删除">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+          </button>
         </div>
       </div>
       <el-empty v-else description="暂无观看历史" />
@@ -77,12 +77,6 @@ const loadHistory = async () => {
 const getProgress = (item) => {
   if (!item.duration) return 0
   return Math.min(100, (item.current_time / item.duration) * 100)
-}
-
-const formatProgress = (item) => {
-  if (!item.current_time) return '0%'
-  const pct = getProgress(item)
-  return `${Math.floor(item.current_time / 60)}分 / ${Math.floor((item.duration || 0) / 60)}分`
 }
 
 const handleResume = (item) => {
@@ -162,124 +156,126 @@ onMounted(loadHistory)
   padding: 60px 0;
 }
 
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px;
 }
 
 .history-item {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 16px;
-  border-radius: 12px;
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
   background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
-  transition: all 0.2s;
+  transition: transform 0.2s;
 }
 .history-item:hover {
-  background: rgba(255,255,255,0.08);
+  transform: scale(1.03);
 }
 
-.item-main {
-  display: flex;
-  gap: 16px;
-  flex: 1;
+.item-poster {
+  position: relative;
   cursor: pointer;
-  min-width: 0;
 }
-
-.poster {
-  width: 120px;
-  height: 68px;
+.item-poster img {
+  width: 100%;
+  aspect-ratio: 2/3;
   object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-  background: #333;
+  display: block;
 }
 
-.info {
-  flex: 1;
+.play-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
   display: flex;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  min-width: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.item-poster:hover .play-overlay {
+  opacity: 1;
 }
 
-.info h3 {
+.play-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(99, 102, 241, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.play-btn svg {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+  margin-left: 3px;
+}
+
+.progress-indicator {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 8px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+}
+.progress-bar {
+  height: 3px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 2px;
+}
+
+.item-info {
+  padding: 10px 12px;
+}
+.item-info h3 {
   margin: 0 0 4px 0;
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .subtitle {
-  margin: 0 0 6px 0;
-  font-size: 12px;
-  color: #888;
-}
-
-.progress-bar {
-  height: 3px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
-  margin-bottom: 4px;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
-  border-radius: 2px;
-  transition: width 0.3s;
-}
-
-.progress-text {
   font-size: 11px;
-  color: #666;
-}
-
-.item-actions {
-  display: flex;
-  gap: 8px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.history-item:hover .item-actions {
-  opacity: 1;
-}
-
-.action-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  border: none;
   color: #888;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: #fff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
   transition: all 0.2s;
 }
-.action-btn svg {
-  width: 18px;
-  height: 18px;
+.delete-btn svg {
+  width: 16px;
+  height: 16px;
 }
-.action-btn:hover {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
+.history-item:hover .delete-btn {
+  opacity: 1;
 }
-.action-btn.play:hover {
-  background: rgba(99, 102, 241, 0.3);
-  color: #a5b4fc;
-}
-.action-btn.delete:hover {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+.delete-btn:hover {
+  background: rgba(239, 68, 68, 0.8);
 }
 
 @media (max-width: 600px) {
@@ -297,14 +293,11 @@ onMounted(loadHistory)
   .page-content {
     padding: 90px 16px 16px;
   }
-  .poster {
-    width: 90px;
-    height: 50px;
+  .history-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 16px;
   }
-  .info h3 {
-    font-size: 14px;
-  }
-  .item-actions {
+  .delete-btn {
     opacity: 1;
   }
 }
