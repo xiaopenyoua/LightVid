@@ -11,7 +11,18 @@
           v-model="searchKeyword"
           @keyup.enter="goSearch"
         >
-        <button class="nav-btn">👤</button>
+        <router-link to="/favorites" class="nav-icon-btn" title="我的收藏">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </router-link>
+        <router-link to="/history" class="nav-icon-btn" title="继续观看">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.954 8.954 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+        </router-link>
+        <router-link to="/tvbox" class="nav-icon-btn" title="TV Box 源">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM9 8h2v8H9zm4 2h2v6h-2z"/></svg>
+        </router-link>
+        <router-link to="/settings" class="nav-icon-btn" title="设置">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+        </router-link>
       </div>
     </nav>
 
@@ -20,7 +31,7 @@
       <div class="section hero-section">
       <HeroCarousel
         v-if="homeData?.trending_all?.length"
-        :items="homeData.trending_all"
+        :items="trendingItems"
         @select="handleSelect"
         @play="handlePlay"
         @favorite="handleFavorite"
@@ -114,7 +125,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { getHome, getMovies, getTvShows, getGenres, addFavorite } from '../api'
+import { getHome, getMovies, getTvShows, getGenres, addFavorite, getFavorites, removeFavorite } from '../api'
 import HeroCarousel from '../components/HeroCarousel.vue'
 import GenreSidebar from '../components/GenreSidebar.vue'
 import FilmGrid from '../components/FilmGrid.vue'
@@ -127,6 +138,7 @@ const homeData = ref(null)
 const genreData = ref({ movie: [], tv: [] })
 const currentItems = ref([])
 const currentGenre = ref({ key: 'hot', name: '热门推荐', media_type: null, tmdb_id: null })
+const favoritedIds = ref(new Set())
 const filters = ref({
   sort_by: 'popularity.desc',
   genre: '',
@@ -183,9 +195,21 @@ const genreOptions = computed(() => {
 
 const popularAll = computed(() => homeData.value?.popular_all || [])
 
+// 带收藏状态的轮播项
+const trendingItems = computed(() => {
+  return popularAll.value.map(item => ({
+    ...item,
+    is_favorite: favoritedIds.value.has(item.tmdb_id)
+  }))
+})
+
 const loadHome = async () => {
   try {
-    const [homeRes, genresRes] = await Promise.all([getHome(), getGenres()])
+    const [homeRes, genresRes, favRes] = await Promise.all([
+      getHome(),
+      getGenres(),
+      getFavorites()
+    ])
     homeData.value = homeRes.data
     // 按 media_type 分离 genres
     const allGenres = genresRes.data
@@ -193,6 +217,8 @@ const loadHome = async () => {
       movie: allGenres.filter(g => g.media_type === 'movie'),
       tv: allGenres.filter(g => g.media_type === 'tv'),
     }
+    // 加载收藏状态
+    favoritedIds.value = new Set(favRes.data.map(f => f.tmdb_id))
     currentItems.value = popularAll.value
   } catch {
     ElMessage.error('加载首页数据失败')
@@ -302,11 +328,21 @@ const handlePlay = (item) => {
 }
 
 const handleFavorite = async (item) => {
+  const isFav = favoritedIds.value.has(item.tmdb_id)
   try {
-    await addFavorite(item.tmdb_id)
-    ElMessage.success('收藏成功')
+    if (isFav) {
+      await removeFavorite(item.tmdb_id)
+      favoritedIds.value.delete(item.tmdb_id)
+      ElMessage.success('已取消收藏')
+    } else {
+      await addFavorite(item.tmdb_id)
+      favoritedIds.value.add(item.tmdb_id)
+      ElMessage.success('收藏成功')
+    }
+    // 触发响应式更新
+    favoritedIds.value = new Set(favoritedIds.value)
   } catch {
-    ElMessage.error('收藏失败')
+    ElMessage.error('操作失败')
   }
 }
 
@@ -461,15 +497,27 @@ onUnmounted(() => {
 .nav-search::placeholder {
   color: rgba(255,255,255,0.4);
 }
-.nav-btn {
+.nav-icon-btn {
   width: 40px;
   height: 40px;
   border-radius: 50%;
   background: rgba(255,255,255,0.08);
   border: none;
-  color: #fff;
+  color: rgba(255,255,255,0.7);
   cursor: pointer;
-  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.nav-icon-btn svg {
+  width: 20px;
+  height: 20px;
+}
+.nav-icon-btn:hover {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
 }
 
 #fullpage {

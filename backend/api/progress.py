@@ -17,6 +17,7 @@ def get_progress(tmdb_id: int, season: int = None, episode: int = None, db: Sess
         return None
     return {
         "tmdb_id": item.tmdb_id,
+        "media_type": item.media_type,
         "season": item.season,
         "episode": item.episode,
         "current_time": item.current_time,
@@ -31,6 +32,7 @@ def save_progress(data: dict, db: Session = Depends(get_db)):
     tmdb_id = data.get("tmdb_id")
     season = data.get("season")
     episode = data.get("episode")
+    media_type = data.get("media_type")
 
     existing = db.query(WatchProgress).filter_by(
         tmdb_id=tmdb_id, season=season, episode=episode
@@ -39,10 +41,13 @@ def save_progress(data: dict, db: Session = Depends(get_db)):
     if existing:
         existing.current_time = data.get("current_time", existing.current_time)
         existing.duration = data.get("duration", existing.duration)
+        if media_type:
+            existing.media_type = media_type
         existing.updated_at = datetime.utcnow()
     else:
         progress = WatchProgress(
             tmdb_id=tmdb_id,
+            media_type=media_type,
             season=season,
             episode=episode,
             current_time=data.get("current_time", 0),
@@ -61,6 +66,8 @@ def save_progress(data: dict, db: Session = Depends(get_db)):
         if existing:
             existing.current_time = data.get("current_time", existing.current_time)
             existing.duration = data.get("duration", existing.duration)
+            if media_type:
+                existing.media_type = media_type
             db.commit()
 
     return {"ok": True}
@@ -73,6 +80,7 @@ def get_progress_list(tmdb_id: int, db: Session = Depends(get_db)):
     return [
         {
             "tmdb_id": item.tmdb_id,
+            "media_type": item.media_type,
             "season": item.season,
             "episode": item.episode,
             "current_time": item.current_time,

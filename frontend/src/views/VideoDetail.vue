@@ -161,7 +161,8 @@ const loadDetail = async () => {
     try {
       const { data: fav } = await checkFavorite(tmdbId())
       isFavorite.value = fav.is_favorite
-    } catch {
+    } catch (e) {
+      console.warn('[收藏] 检查失败:', e)
       isFavorite.value = false
     }
   } catch {

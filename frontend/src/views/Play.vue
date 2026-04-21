@@ -790,7 +790,8 @@ const saveCurrentProgress = () => {
       isTv ? currentSeason.value : null,
       isTv ? currentEpisode.value : null,
       currentTime.value,
-      duration.value
+      duration.value,
+      mediaType()
     ).catch(e => console.warn('[进度] 保存失败:', e))
   }
 }

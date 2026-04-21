@@ -50,7 +50,12 @@ export const deleteParseConfig = (id) => api.delete(`/parse-configs/${id}`)
 
 export const getHistory = () => api.get('/history')
 export const updateHistory = (tmdbId, data) => api.post('/history', { tmdb_id: tmdbId, ...data })
-export const deleteHistory = (tmdbId) => api.delete(`/history/${tmdbId}`)
+export const deleteHistory = (tmdbId, season, episode) => {
+  const params = {}
+  if (season !== undefined) params.season = season
+  if (episode !== undefined) params.episode = episode
+  return api.delete(`/history/${tmdbId}`, { params })
+}
 
 // ============ Favorites API（保持不变）============
 

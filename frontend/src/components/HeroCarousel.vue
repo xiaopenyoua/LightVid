@@ -29,9 +29,9 @@
           <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           立即播放
         </button>
-        <button class="btn-secondary" @click.stop="handleFavorite(currentItem)">
-          <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-          收藏
+        <button class="btn-secondary" :class="{ active: currentItem?.is_favorite }" @click.stop="handleFavorite(currentItem)">
+          <svg width="20" height="20" :fill="currentItem?.is_favorite ? '#ef4444' : 'currentColor'" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          {{ currentItem?.is_favorite ? '已收藏' : '收藏' }}
         </button>
       </div>
     </div>
@@ -46,7 +46,10 @@
         @click="currentIndex = index"
       >
         <div class="dot-line"></div>
-        <span class="dot-title">{{ item.title }}</span>
+        <span class="dot-title">
+          <span v-if="item.is_favorite" class="dot-favorite">❤</span>
+          {{ item.title }}
+        </span>
       </div>
     </div>
 
@@ -216,6 +219,10 @@ onUnmounted(() => stopAutoPlay())
   transition: background 0.2s;
 }
 .btn-secondary:hover { background: rgba(255,255,255,0.25); }
+.btn-secondary.active {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+}
 
 /* Carousel Dots */
 .carousel-dots {
@@ -258,6 +265,11 @@ onUnmounted(() => stopAutoPlay())
   background: #fff;
 }
 .carousel-dot:hover .dot-line { background: rgba(255,255,255,0.6); }
+
+.dot-favorite {
+  color: #ef4444;
+  margin-right: 4px;
+}
 
 /* Scroll Indicator */
 .scroll-indicator {

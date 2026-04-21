@@ -24,14 +24,16 @@ export function getProgress(tmdbId, season = null, episode = null) {
  * @param {number|null} episode - 集数
  * @param {number} currentTime - 当前播放位置（秒）
  * @param {number} duration - 视频总时长（秒）
+ * @param {string} mediaType - 媒体类型 "movie" 或 "tv"
  */
-export function saveProgress(tmdbId, season, episode, currentTime, duration) {
+export function saveProgress(tmdbId, season, episode, currentTime, duration, mediaType) {
     return api.post('/progress', {
         tmdb_id: tmdbId,
         season: season,
         episode: episode,
         current_time: currentTime,
-        duration: duration
+        duration: duration,
+        media_type: mediaType
     })
 }
 

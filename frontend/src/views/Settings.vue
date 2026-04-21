@@ -1,20 +1,34 @@
 <template>
-  <div class="settings">
-    <h2>解析接口管理</h2>
-    <el-button type="primary" @click="openAddDialog">添加解析接口</el-button>
-    <el-table v-loading="loading" :data="configs" style="width: 100%; margin-top: 20px">
-      <el-table-column prop="name" label="名称" />
-      <el-table-column prop="base_url" label="地址" show-overflow-tooltip />
-      <el-table-column prop="priority" label="优先级" width="100" />
-      <el-table-column label="操作" width="150">
-        <template #default="{ row }">
-          <el-button size="small" @click="editConfig(row)">编辑</el-button>
-          <el-button size="small" type="danger" @click="handleDelete(row.id)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+  <div class="page-container">
+    <header class="page-header">
+      <router-link to="/" class="nav-logo">轻影</router-link>
+      <h1>设置</h1>
+    </header>
 
-    <el-dialog v-model="showAddDialog" :title="editing ? '编辑' : '添加'" destroy-on-close>
+    <div class="page-content">
+      <section class="settings-section">
+        <h2 class="section-title">解析接口管理</h2>
+        <el-button type="primary" @click="openAddDialog" class="add-btn">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+          添加解析接口
+        </el-button>
+        <div class="table-wrapper">
+          <el-table v-loading="loading" :data="configs" stripe>
+            <el-table-column prop="name" label="名称" />
+            <el-table-column prop="base_url" label="地址" show-overflow-tooltip />
+            <el-table-column prop="priority" label="优先级" width="100" align="center" />
+            <el-table-column label="操作" width="150" align="center">
+              <template #default="{ row }">
+                <el-button size="small" @click="editConfig(row)">编辑</el-button>
+                <el-button size="small" type="danger" @click="handleDelete(row.id)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </section>
+    </div>
+
+    <el-dialog v-model="showAddDialog" :title="editing ? '编辑解析接口' : '添加解析接口'" destroy-on-close class="settings-dialog">
       <el-form :model="form" label-width="80px">
         <el-form-item label="名称">
           <el-input v-model="form.name" placeholder="如：虾米解析" />
@@ -107,3 +121,110 @@ const handleDelete = async (id) => {
   }
 }
 </script>
+
+<style scoped>
+.page-container {
+  min-height: 100vh;
+  background: #0d0d1a;
+}
+
+.page-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  height: 90px;
+  padding: 0 48px;
+  box-sizing: border-box;
+  background: rgba(20, 20, 30, 0.98);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.page-header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0;
+  flex: 1;
+  text-align: center;
+  padding-right: 120px;
+}
+
+.nav-logo {
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.page-content {
+  padding: 100px 32px 24px;
+}
+
+.settings-section {
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  margin: 0 0 20px 0;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.add-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.table-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+:deep(.el-table) {
+  background: transparent;
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
+  --el-table-header-bg-color: rgba(255,255,255,0.03);
+  color: #ccc;
+}
+:deep(.el-table th.el-table__cell) {
+  background: rgba(255,255,255,0.03);
+  color: #888;
+  font-weight: 500;
+}
+:deep(.el-table td.el-table__cell) {
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+:deep(.el-table__body tr:hover > td.el-table__cell) {
+  background: rgba(255,255,255,0.05);
+}
+
+@media (max-width: 600px) {
+  .page-header {
+    padding: 16px 20px;
+  }
+  .page-content {
+    padding: 16px 20px;
+  }
+  .settings-section {
+    padding: 16px;
+  }
+}
+</style>
