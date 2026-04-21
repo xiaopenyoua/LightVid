@@ -50,7 +50,6 @@
             <h2>{{ currentGenre.name }}</h2>
             <span class="genre-tag" v-if="currentGenre.name !== '热门推荐'">按分类浏览</span>
           </div>
-          <a href="#" class="content-more">查看全部 →</a>
         </div>
 
         <!-- 筛选条件 -->
