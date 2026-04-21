@@ -114,8 +114,18 @@
           @select="handleSelect"
           @play="handlePlay"
         />
-        <el-empty v-else description="暂无数据" />
-      </main>
+        <div v-if="loadingMore" class="loading-more">
+          <span class="loading-dot"></span>
+          <span class="loading-dot"></span>
+          <span class="loading-dot"></span>
+        </div>
+        <div v-if="!loading && !loadingMore && !currentItems.length && canLoadMore" class="no-more">
+          暂无数据
+        </div>
+        <div v-else-if="!hasMore && currentItems.length && canLoadMore" class="no-more">
+          没有更多了
+        </div>
+              </main>
     </div>
   </div>
   </div>
@@ -134,6 +144,9 @@ import LoadingSpinner from '../components/LoadingSpinner.vue'
 const router = useRouter()
 const searchKeyword = ref('')
 const loading = ref(false)
+const loadingMore = ref(false)
+const currentPage = ref(1)
+const hasMore = ref(true)
 const homeData = ref(null)
 const genreData = ref({ movie: [], tv: [] })
 const currentItems = ref([])
@@ -228,73 +241,100 @@ const loadHome = async () => {
 const loadGenreContent = async (genre) => {
   loading.value = true
   currentItems.value = []
+  currentPage.value = 3
+  hasMore.value = true
   try {
     if (genre.key === 'hot') {
       currentItems.value = popularAll.value
+      hasMore.value = false
     }
     // 电影
     else if (genre.key === 'movie') {
-      const params = { page: 1, sort_by: filters.value.sort_by }
-      if (filters.value.genre) params.genres = filters.value.genre
-      if (filters.value.language) params.language = filters.value.language
+      const baseParams = { sort_by: filters.value.sort_by }
+      if (filters.value.genre) baseParams.genres = filters.value.genre
+      if (filters.value.language) baseParams.language = filters.value.language
       if (filters.value.year) {
         if (filters.value.year === 'before') {
-          params.year = 2018
+          baseParams.year = 2018
         } else {
-          params.year = Number(filters.value.year)
+          baseParams.year = Number(filters.value.year)
         }
       }
-      const { data } = await getMovies(params)
-      currentItems.value = data.slice(0, 20)
+      const [p1, p2, p3] = await Promise.all([
+        getMovies({ ...baseParams, page: 1 }),
+        getMovies({ ...baseParams, page: 2 }),
+        getMovies({ ...baseParams, page: 3 }),
+      ])
+      const data = [...p1.data, ...p2.data, ...p3.data]
+      currentItems.value = data
+      if (data.length === 0) hasMore.value = false
     }
     // 剧集
     else if (genre.key === 'tv') {
-      const params = { page: 1, sort_by: filters.value.sort_by }
-      if (filters.value.genre) params.genres = filters.value.genre
-      if (filters.value.language) params.language = filters.value.language
+      const baseParams = { sort_by: filters.value.sort_by }
+      if (filters.value.genre) baseParams.genres = filters.value.genre
+      if (filters.value.language) baseParams.language = filters.value.language
       if (filters.value.year) {
         if (filters.value.year === 'before') {
-          params.year = 2018
+          baseParams.year = 2018
         } else {
-          params.year = Number(filters.value.year)
+          baseParams.year = Number(filters.value.year)
         }
       }
-      const { data } = await getTvShows(params)
-      currentItems.value = data.slice(0, 20)
+      const [p1, p2, p3] = await Promise.all([
+        getTvShows({ ...baseParams, page: 1 }),
+        getTvShows({ ...baseParams, page: 2 }),
+        getTvShows({ ...baseParams, page: 3 }),
+      ])
+      const data = [...p1.data, ...p2.data, ...p3.data]
+      currentItems.value = data
+      if (data.length === 0) hasMore.value = false
     }
     // 综艺：使用 TV discover，genre 10764(Reality)+10767(Talk)+10766(Soap)
     else if (genre.key === 'variety') {
-      const params = { page: 1, sort_by: filters.value.sort_by }
-      params.genres = '10764,10767,10766'
-      if (filters.value.language) params.language = filters.value.language
+      const baseParams = { sort_by: filters.value.sort_by }
+      baseParams.genres = '10764,10767,10766'
+      if (filters.value.language) baseParams.language = filters.value.language
       if (filters.value.year) {
         if (filters.value.year === 'before') {
-          params.year = 2018
+          baseParams.year = 2018
         } else {
-          params.year = Number(filters.value.year)
+          baseParams.year = Number(filters.value.year)
         }
       }
-      const { data } = await getTvShows(params)
-      currentItems.value = data.slice(0, 20)
+      const [p1, p2, p3] = await Promise.all([
+        getTvShows({ ...baseParams, page: 1 }),
+        getTvShows({ ...baseParams, page: 2 }),
+        getTvShows({ ...baseParams, page: 3 }),
+      ])
+      const data = [...p1.data, ...p2.data, ...p3.data]
+      currentItems.value = data
+      if (data.length === 0) hasMore.value = false
     }
     // 动漫：默认使用 genre 16 (Animation)，但允许用户选择其他类型
     else if (genre.key === 'anime') {
-      const params = { page: 1, sort_by: filters.value.sort_by }
-      // 用户选择的类型，或者默认 Animation
-      params.genres = filters.value.genre || '16'
-      if (filters.value.language) params.language = filters.value.language
+      const baseParams = { sort_by: filters.value.sort_by }
+      baseParams.genres = filters.value.genre || '16'
+      if (filters.value.language) baseParams.language = filters.value.language
       if (filters.value.year) {
         if (filters.value.year === 'before') {
-          params.year = 2018
+          baseParams.year = 2018
         } else {
-          params.year = Number(filters.value.year)
+          baseParams.year = Number(filters.value.year)
         }
       }
-      const { data } = await getMovies(params)
-      currentItems.value = data.slice(0, 20)
+      const [p1, p2, p3] = await Promise.all([
+        getMovies({ ...baseParams, page: 1 }),
+        getMovies({ ...baseParams, page: 2 }),
+        getMovies({ ...baseParams, page: 3 }),
+      ])
+      const data = [...p1.data, ...p2.data, ...p3.data]
+      currentItems.value = data
+      if (data.length === 0) hasMore.value = false
     }
     else {
       currentItems.value = popularAll.value
+      hasMore.value = false
     }
   } catch {
     currentItems.value = []
@@ -419,6 +459,80 @@ const handleScroll = (e) => {
   // 如果滚动到中间位置，清除期望方向
   if (!isAtTop && !isAtBottom) {
     expectedDelta = 0
+  }
+
+  // 无限滚动：电影/剧集/综艺/动漫 分类，滚动到底部附近时加载更多
+  if (isContentArea && canLoadMore.value && !loadingMore.value && !loading.value) {
+    const nearBottom = scrollTop + clientHeight >= scrollHeight - 200
+    if (nearBottom) {
+      loadMoreItems()
+    }
+  }
+}
+
+const canLoadMore = computed(() => {
+  return ['movie', 'tv', 'variety', 'anime'].includes(currentGenre.value.key)
+})
+
+const loadMoreItems = async () => {
+  if (!hasMore.value || loadingMore.value) return
+  loadingMore.value = true
+  try {
+    const nextPage = currentPage.value + 1
+    const baseParams = { sort_by: filters.value.sort_by }
+    if (filters.value.genre) baseParams.genres = filters.value.genre
+    if (filters.value.language) baseParams.language = filters.value.language
+    if (filters.value.year) {
+      if (filters.value.year === 'before') {
+        baseParams.year = 2018
+      } else {
+        baseParams.year = Number(filters.value.year)
+      }
+    }
+
+    let newItems = []
+    if (currentGenre.value.key === 'movie') {
+      const [p1, p2, p3] = await Promise.all([
+        getMovies({ ...baseParams, page: nextPage }),
+        getMovies({ ...baseParams, page: nextPage + 1 }),
+        getMovies({ ...baseParams, page: nextPage + 2 }),
+      ])
+      newItems = [...p1.data, ...p2.data, ...p3.data]
+    } else if (currentGenre.value.key === 'tv') {
+      const [p1, p2, p3] = await Promise.all([
+        getTvShows({ ...baseParams, page: nextPage }),
+        getTvShows({ ...baseParams, page: nextPage + 1 }),
+        getTvShows({ ...baseParams, page: nextPage + 2 }),
+      ])
+      newItems = [...p1.data, ...p2.data, ...p3.data]
+    } else if (currentGenre.value.key === 'variety') {
+      baseParams.genres = '10764,10767,10766'
+      const [p1, p2, p3] = await Promise.all([
+        getTvShows({ ...baseParams, page: nextPage }),
+        getTvShows({ ...baseParams, page: nextPage + 1 }),
+        getTvShows({ ...baseParams, page: nextPage + 2 }),
+      ])
+      newItems = [...p1.data, ...p2.data, ...p3.data]
+    } else if (currentGenre.value.key === 'anime') {
+      baseParams.genres = filters.value.genre || '16'
+      const [p1, p2, p3] = await Promise.all([
+        getMovies({ ...baseParams, page: nextPage }),
+        getMovies({ ...baseParams, page: nextPage + 1 }),
+        getMovies({ ...baseParams, page: nextPage + 2 }),
+      ])
+      newItems = [...p1.data, ...p2.data, ...p3.data]
+    }
+
+    if (newItems.length === 0) {
+      hasMore.value = false
+    } else {
+      currentItems.value = [...currentItems.value, ...newItems]
+      currentPage.value = nextPage + 2
+    }
+  } catch {
+    // 加载失败不提示，静默忽略
+  } finally {
+    loadingMore.value = false
   }
 }
 
@@ -641,5 +755,31 @@ onUnmounted(() => {
   align-items: center;
   min-height: 400px;
   width: 100%;
+}
+.loading-more {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 0;
+}
+.loading-dot {
+  width: 8px;
+  height: 8px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+.loading-dot:nth-child(1) { animation-delay: -0.32s; }
+.loading-dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.no-more {
+  text-align: center;
+  padding: 32px 0;
+  color: rgba(255,255,255,0.3);
+  font-size: 14px;
 }
 </style>
