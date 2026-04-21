@@ -24,14 +24,29 @@
 
         <!-- 加载状态 -->
         <div v-else-if="loading" class="player-loading">
-          <LoadingSpinner :size="60" />
-          <p>{{ loadingText }}</p>
+          <div class="loading-animation">
+            <div class="loading-bar">
+              <div class="loading-bar-fill"></div>
+            </div>
+            <div class="loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+          <p class="loading-text">{{ loadingText }}</p>
         </div>
 
         <!-- 默认占位 -->
         <div v-else class="player-placeholder">
           <div class="placeholder-content">
-            <span class="placeholder-icon">▶</span>
+            <div class="placeholder-icon">
+              <div class="play-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+              </div>
+            </div>
             <p>正在准备播放...</p>
           </div>
         </div>
@@ -113,9 +128,11 @@ import { ElMessage } from 'element-plus'
 import { getVideoDetail, getSeasonDetail } from '../api'
 import { searchVideoLink, resolveVideo, getParsers, continuePrecache } from '../api/search'
 import Hls from 'hls.js'
-import LoadingSpinner from '../components/LoadingSpinner.vue'
 
 // 视频源列表
+// 用于取消正在进行的请求
+let searchController = null
+let resolveController = null
 const videoSources = [
   { value: 'tencent', label: '腾讯视频' },
   { value: 'iqiyi', label: '爱奇艺' },
@@ -248,10 +265,30 @@ const handlePlay = async () => {
     return
   }
 
+  // 1. 取消之前的请求
+  if (searchController) {
+    searchController.abort()
+    searchController = null
+  }
+  if (resolveController) {
+    resolveController.abort()
+    resolveController = null
+  }
+
+  // 2. 停止当前播放
+  stopCurrentPlayback()
+
   loading.value = true
   loadingText.value = '正在搜索播放链接...'
 
+  // 保存当前选中的集数，用于判断请求返回时是否已切换
+  const playingEpisode = currentEpisode.value
+  const playingSeason = currentSeason.value
+
   try {
+    // 创建新的 AbortController
+    searchController = new AbortController()
+
     // 1. 搜索视频播放链接
     const isTv = mediaType() === 'tv'
 
@@ -263,16 +300,31 @@ const handlePlay = async () => {
       year: video.value.release_date ? parseInt(video.value.release_date.slice(0, 4)) : null,
       season: isTv ? currentSeason.value : null,
       episode: isTv ? currentEpisode.value : null
-    })
+    }, searchController.signal)
+
+    // 检查是否已切换到其他集数
+    if (playingEpisode !== currentEpisode.value || playingSeason !== currentSeason.value) {
+      console.log('[播放] 集数已切换，忽略此次响应')
+      return
+    }
 
     const platformUrl = searchRes.data.platform_url
     loadingText.value = '正在解析视频...'
+
+    // 创建新的 AbortController（旧的已使用完毕）
+    resolveController = new AbortController()
 
     // 2. 解析为 m3u8 或直接播放 URL
     const resolveRes = await resolveVideo({
       platform_url: platformUrl,
       parser_url: selectedParser.value
-    })
+    }, resolveController.signal)
+
+    // 再次检查是否已切换集数
+    if (playingEpisode !== currentEpisode.value || playingSeason !== currentSeason.value) {
+      console.log('[播放] 集数已切换，忽略此次响应')
+      return
+    }
 
     const url = resolveRes.data.m3u8_url
     const parser = resolveRes.data.parser
@@ -296,12 +348,28 @@ const handlePlay = async () => {
       m3u8Url.value = ''
     }
   } catch (err) {
+    // 如果是取消的请求，不显示错误
+    if (err.name === 'AbortError' || err.name === 'CanceledError') {
+      console.log('[播放] 请求已取消')
+      return
+    }
     const msg = err.response?.data?.detail || '播放失败，请尝试其他解析服务'
     ElMessage.error(msg)
     m3u8Url.value = ''
   } finally {
     loading.value = false
   }
+}
+
+// 停止当前播放
+const stopCurrentPlayback = () => {
+  // 清理 HLS 实例
+  if (hlsInstance.value) {
+    hlsInstance.value.destroy()
+    hlsInstance.value = null
+  }
+  // 清除视频 URL（也会停止播放）
+  m3u8Url.value = ''
 }
 
 const playM3u8 = (url) => {
@@ -349,10 +417,17 @@ const playMp4 = (url) => {
 }
 
 const cleanup = () => {
-  if (hlsInstance.value) {
-    hlsInstance.value.destroy()
-    hlsInstance.value = null
+  // 取消所有正在进行的请求
+  if (searchController) {
+    searchController.abort()
+    searchController = null
   }
+  if (resolveController) {
+    resolveController.abort()
+    resolveController = null
+  }
+  // 停止播放
+  stopCurrentPlayback()
 }
 
 // 用于检测是否首次加载
@@ -483,12 +558,84 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 24px;
   color: #888;
 }
-.player-loading p {
-  font-size: 14px;
+
+/* 加载动画 - 进度条 + 跳动圆点 */
+.loading-animation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
 }
+
+.loading-bar {
+  width: 200px;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7);
+  background-size: 200% 100%;
+  border-radius: 2px;
+  animation: loading-gradient 1.5s ease-in-out infinite;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.loading-dots span {
+  width: 8px;
+  height: 8px;
+  background: #6366f1;
+  border-radius: 50%;
+  animation: loading-dot 1.4s ease-in-out infinite;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+  background: #8b5cf6;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+  background: #a855f7;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #666;
+  animation: text-pulse 2s ease-in-out infinite;
+}
+
+@keyframes loading-gradient {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes loading-dot {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes text-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 .player-placeholder {
   width: 100%;
   height: 100%;
@@ -497,18 +644,61 @@ onMounted(async () => {
   justify-content: center;
   background: linear-gradient(135deg, #1a1a2e 0%, #0d0d1a 100%);
 }
+
 .placeholder-content {
   text-align: center;
   color: #666;
 }
+
 .placeholder-icon {
-  font-size: 80px;
-  opacity: 0.2;
-  display: block;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  animation: float 3s ease-in-out infinite;
 }
+
+.play-btn {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(168, 85, 247, 0.3));
+  border: 2px solid rgba(99, 102, 241, 0.5);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: play-pulse 2s ease-in-out infinite;
+}
+
+.play-btn svg {
+  width: 36px;
+  height: 36px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-left: 4px;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes play-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4),
+                0 0 20px rgba(99, 102, 241, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 0 15px rgba(99, 102, 241, 0),
+                0 0 30px rgba(99, 102, 241, 0.3);
+  }
+}
+
 .placeholder-content p {
   font-size: 14px;
+  color: #555;
+  animation: text-fade 2s ease-in-out infinite;
+}
+
+@keyframes text-fade {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
 }
 
 /* 右侧面板 */

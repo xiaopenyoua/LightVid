@@ -20,16 +20,20 @@ export function getParsers() {
 
 /**
  * 搜索视频播放链接
+ * @param {Object} params - 请求参数
+ * @param {AbortSignal} params.signal - 可选的取消信号
  */
-export function searchVideoLink(params) {
-    return api.post('/search/video-link', params)
+export function searchVideoLink(params, signal) {
+    return api.post('/search/video-link', params, signal ? { signal } : {})
 }
 
 /**
  * 解析视频链接为 m3u8
+ * @param {Object} params - 请求参数
+ * @param {AbortSignal} params.signal - 可选的取消信号
  */
-export function resolveVideo(params) {
-    return api.post('/search/resolve', params)
+export function resolveVideo(params, signal) {
+    return api.post('/search/resolve', params, signal ? { signal } : {})
 }
 
 /**
