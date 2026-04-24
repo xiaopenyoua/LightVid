@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Local files
+.env
+.env.local
+*.db
+*.db-journal
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Test files
+test/
+tests/
+*.test.py
+
+# Playwright browsers (huge, not needed in production)
+playwright/.local-browsers/

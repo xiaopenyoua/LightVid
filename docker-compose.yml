@@ -1,16 +1,18 @@
 services:
-  frontend:
-    image: nginx:alpine
+  lightvid-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     ports:
-      - "80:80"
-    volumes:
-      - ./frontend/dist:/usr/share/nginx/html
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - "18778:80"
     depends_on:
-      backend:
+      lightvid-backend:
         condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - lightvid-network
 
-  backend:
+  lightvid-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -18,11 +20,21 @@ services:
       - "18668:18668"
     volumes:
       - ./data:/app/data
+    env_file:
+      - ./backend/.env
     working_dir: /app
-    command: uvicorn main:app --host 0.0.0.0 --port 18668
+    command: >
+      sh -c "uvicorn main:app --host 0.0.0.0 --port 18668"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:18668/api/health"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 10s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - lightvid-network
+
+networks:
+  lightvid-network:
+    driver: bridge
